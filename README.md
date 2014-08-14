@@ -1,7 +1,7 @@
 Course Plan
 ===========
 
-| Week |  Date | Chapter | Topic                                        | Teacher | Comment        |
+| W    |  Date | Chapter | Topic                                        | Teacher | Comment        |
 |:----:|:-----:|:-------:|----------------------------------------------|:-------:|----------------|
 |  35  |  25/8 |    1    | Introduction to Operating Systems            |  Morten |                |
 |      |  26/8 |    2    | The Kernel Abstraction                       |  Morten |                |
