@@ -1,36 +1,51 @@
 Course Plan
 ===========
 
-| W    |  Date | Chap. | Topic                                  | Teacher | Comment      |
+Pass/Fail (not graded):
+Lab 1: Unix, programming tools and C
+Lab 2: Go intro
+Lab 3: Go Networking
+Lab 4: Go Programming tools
+Lab 5: Threads and protection
+
+Graded:
+Lab 6: ChanStat
+Lab 7: Kernel IO 
+
+
+
+
+| W    |  Date | Chap. | Topic                                  | Teacher | Travels      |
 |:----:|:-----:|:-----:|----------------------------------------|:-------:|--------------|
 |  35  |  25/8 |   1   | Introduction to Operating Systems      |  Morten |              |
-|      |  26/8 |       | Introduction to C                      |  Morten |              |
+|      |  26/8 |   C   | Introduction to C programming          |  Morten |              |
 |      |  26/8 | Lab 1 | Unix, programming tools and C          |  Morten |              |
-|  36  |  1/9  |       | C programming, variable, pointers, mem |  Morten |              |
-|      |  2/9  |   3   | The Programming Interface              |   Hein  |              |
-|      |  2/9  | Lab 1 | The Go Programming Language            |   Hein  |              |
-|      |  7/9  |       | Lab 1 Handin                           |         |              |
-|  37  |  8/9  |   4   | Concurrency and Threads                |   Hein  | Morten@CP    |
-|      |  9/9  |   4   | Concurrency and Threads                |   Hein  |              |
-|      |  9/9  | Lab 2 | Network Programming with Go            |   Hein  |              |
+|      |  31/8 |       | *Lab 1 Handin                          |         |              |
+|  36  |  1/9  |   C   | Variables, pointers, and memory        |  Morten |              |
+|      |  2/9  |   2   | The Kernel Abstraction                 |   Hein  |              |
+|      |  2/9  | Lab 2 | Introduction to Go programming         |   Hein  |              |
+|      |  7/9  |       | **Lab 2 Handin                         |         |              |
+|  37  |  8/9  |   3   | The Programming Interface              |   Hein  | Morten@CP    |
+|      |  9/9  |   4   | Concurrency and Threads                |   Hein  |     "        |
+|      |  9/9  | Lab 2 | Network Programming with Go            |   Hein  |     "        |
 |      |  14/9 |       | Lab 2 Handin                           |         |              |
-|  38  |  15/9 |   5   | Synchronizing Access to Shared Objects |   Hein  |              |
+|  38  |  15/9 |   4   | Concurrency and Threads                |   Hein  |              |
 |      |  16/9 |   5   | Synchronizing Access to Shared Objects |   Hein  |              |
 |      |  16/9 | Lab 3 | Threads and Protection                 |  Morten |              |
 |      |  21/9 |       | Lab 3 Handin                           |         |              |
 |  39  |  22/9 |   5   | Synchronizing Access to Shared Objects |   Hein  | Morten@ICTSS |
-|      |  23/9 |   6   | Advanced Synchronization               |   Hein  |              |
-|      |  23/9 | Lab 4 | Programming Tools                      |   Hein  |              |
+|      |  23/9 |   6   | Advanced Synchronization               |   Hein  |     "        |
+|      |  23/9 | Lab 4 | Programming Tools                      |   Hein  |     "        |
 |  40  |  29/9 |   6   | Advanced Synchronization               |   Hein  |              |
 |      |  30/9 |   6   | Advanced Synchronization               |   Hein  | Morten@Oslo  |
 |      |  30/9 | Lab 4 | Programming Tools                      |   Hein  |              |
 |      |  5/10 |       | Lab 4 Handin                           |         |              |
 |  41  |  6/10 |       |                                        |  Morten | Hein@OSDI    |
-|      |  7/10 |       |                                        |  Morten |              |
-|      |  7/10 | Lab 5 | Threads and protection                 |  Morten |              |
+|      |  7/10 |       |                                        |  Morten |     "        |
+|      |  7/10 | Lab 5 | Threads and protection                 |  Morten |     "        |
 |  42  | 13/10 |       |                                        |  Morten | Hein@DISC    |
-|      | 14/10 |       |                                        |  Morten |              |
-|      | 14/10 | Lab 5 | Threads and protection                 |  Morten |              |
+|      | 14/10 |       |                                        |  Morten |     "        |
+|      | 14/10 | Lab 5 | Threads and protection                 |  Morten |     "        |
 |  43  | 20/10 |   7   | Scheduling                             |   Hein  |              |
 |      | 21/10 |   7   | Scheduling                             |   Hein  |              |
 |      | 21/10 | Lab 5 | Threads and protection                 |  Morten |              |
