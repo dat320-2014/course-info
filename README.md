@@ -23,7 +23,7 @@ Course Plan
 |      |  23/9 | Lab 4 | Programming Tools                      |   Hein  |              |
 |  40  |  29/9 |   6   | Advanced Synchronization               |   Hein  |              |
 |      |  30/9 |   6   | Advanced Synchronization               |   Hein  | Morten@Oslo  |
-|      |  30/9 | Lab 4 | Programming Tools                      |  Morten |              |
+|      |  30/9 | Lab 4 | Programming Tools                      |   Hein  |              |
 |      |  5/10 |       | Lab 4 Handin                           |         |              |
 |  41  |  6/10 |       |                                        |  Morten | Hein@OSDI    |
 |      |  7/10 |       |                                        |  Morten |              |
