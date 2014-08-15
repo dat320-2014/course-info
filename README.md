@@ -4,7 +4,8 @@ The course is based on this [textbook](http://www.recursivebooks.com):
 Operating Systems: Principles and Practice, Tom Anderson and Mike Dahlin. 
 You do not need the second edition. I only have the beta edition still.
 
-All chapters listed below and Lab exercises 1-7.
+All chapters listed below and Lab exercises 1-7 are syllabus. 
+I will notify of any changes that may arise.
 
 * Chapter 1: All, but in particular the concepts in 1.2.
 * Chapter 2: All except 2.4 and 2.5. Sidebar on page 93 give a good summary.
