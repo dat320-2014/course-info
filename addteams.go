@@ -109,7 +109,8 @@ func createTeams(teamDir *string) {
 		return strings.HasSuffix(file, "txt")
 	})
 	for grp, file := range teamFiles {
-		b, err := ioutil.ReadFile(filepath.Join(*teamDir, file))
+		oldpath := filepath.Join(*teamDir, file)
+		b, err := ioutil.ReadFile(oldpath)
 		if err != nil {
 			panic(err)
 		}
@@ -117,6 +118,13 @@ func createTeams(teamDir *string) {
 		name := fmt.Sprintf("%s%d", groupName, grp+1)
 		teamID := createTeam(name)
 		addMembers(teamID, members)
+		// Mark the processed file by renaming it
+		newpath := strings.Replace(oldpath, ".txt", ".done", 1)
+		err = os.Rename(oldpath, newpath)
+		if err != nil {
+			fmt.Println("Could not rename to:", newpath)
+			fmt.Println(err)
+		}
 	}
 }
 
@@ -148,7 +156,6 @@ func addMembers(teamID int, members []string) {
 	}
 
 	for _, member := range members {
-		fmt.Printf("Checking %s for team id: %d\n", member, teamID)
 		if !users[member] {
 			_, err = client.Organizations.AddTeamMember(teamID, member)
 			if err != nil {
