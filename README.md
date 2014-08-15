@@ -4,9 +4,9 @@ Course Plan
 | W    |  Date | Chap. | Topic                                  | Teacher | Comment      |
 |:----:|:-----:|:-----:|----------------------------------------|:-------:|--------------|
 |  35  |  25/8 |   1   | Introduction to Operating Systems      |  Morten |              |
-|      |  26/8 |   2   | The Kernel Abstraction                 |  Morten |              |
-|      |  26/8 | Lab 1 | The Go Programming Language            |  Morten |              |
-|  36  |  1/9  |   2   | The Kernel Abstraction                 |  Morten |              |
+|      |  26/8 |       | Introduction to C                      |  Morten |              |
+|      |  26/8 | Lab 1 | Unix, programming tools and C          |  Morten |              |
+|  36  |  1/9  |       | C programming, variable, pointers, mem |  Morten |              |
 |      |  2/9  |   3   | The Programming Interface              |   Hein  |              |
 |      |  2/9  | Lab 1 | The Go Programming Language            |   Hein  |              |
 |      |  7/9  |       | Lab 1 Handin                           |         |              |
@@ -27,13 +27,13 @@ Course Plan
 |      |  5/10 |       | Lab 4 Handin                           |         |              |
 |  41  |  6/10 |       |                                        |  Morten | Hein@OSDI    |
 |      |  7/10 |       |                                        |  Morten |              |
-|      |  7/10 | Lab 5 | Linux Kernel Driver for IO             |  Morten |              |
+|      |  7/10 | Lab 5 | Threads and protection                 |  Morten |              |
 |  42  | 13/10 |       |                                        |  Morten | Hein@DISC    |
 |      | 14/10 |       |                                        |  Morten |              |
-|      | 14/10 | Lab 5 | Linux Kernel Driver for IO             |  Morten |              |
+|      | 14/10 | Lab 5 | Threads and protection                 |  Morten |              |
 |  43  | 20/10 |   7   | Scheduling                             |   Hein  |              |
 |      | 21/10 |   7   | Scheduling                             |   Hein  |              |
-|      | 21/10 | Lab 5 | Linux Kernel Driver for IO             |  Morten |              |
+|      | 21/10 | Lab 5 | Threads and protection                 |  Morten |              |
 |      | 26/10 |       | Lab 5 Handin                           |         |              |
 |  44  | 27/10 |   8   | Address Translation                    |   Hein  |              |
 |      | 28/10 |   8   | Address Translation                    |   Hein  |              |
