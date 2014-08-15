@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"code.google.com/p/goauth2/oauth"
@@ -14,7 +16,7 @@ import (
 )
 
 // the default group name prefix; will be appended by a sequential group number
-const groupName = "group"
+const groupName = "Group"
 
 var usageString = `
 This program relys on setting some environment variables.
@@ -53,6 +55,9 @@ var (
 // team name -> team id
 var teams = make(map[string]int)
 
+// user name -> team id to which the user is already added
+var users = make(map[string]int)
+
 func main() {
 	teamDir := flag.String("dir", "teams", "directory with team files")
 	flag.Usage = func() {
@@ -90,34 +95,97 @@ func main() {
 		fmt.Printf("\t%v\n", *r.FullName)
 	}
 
+	nxtGrp := loadExistingTeams()
+	createTeams(teamDir, nxtGrp)
+}
+
+// load existing teams and users and return the next group number to be added
+func loadExistingTeams() (nxtGrp int) {
 	ts, _, err := client.Organizations.ListTeams(courseOrg, nil)
 	if err != nil {
 		// ListTeams failed; not sure if this can happen if there are no teams??
 		panic(err)
 	}
 	for _, tname := range ts {
+		if *tname.Name == "Owners" {
+			// ignore the 'Owners' team
+			continue
+		}
+		fmt.Println("Found existing team:", *tname.Name)
+		m, err := strconv.Atoi(strings.TrimPrefix(*tname.Name, groupName))
+		if err != nil {
+			// ignore teams without a number at the end
+			continue
+		}
+		if m > nxtGrp {
+			nxtGrp = m
+		}
 		teams[*tname.Name] = *tname.ID
+		ms, _, err := client.Organizations.ListTeamMembers(*tname.ID, nil)
+		if err != nil {
+			panic(err)
+		}
+		for _, u := range ms {
+			if prevTID, exists := users[*u.Login]; exists {
+				fmt.Printf("Unable to add '%s' to team %d, already member of %d",
+					*u.Login, *tname.ID, prevTID)
+				continue
+			}
+			users[*u.Login] = *tname.ID
+		}
 	}
-
-	createTeams(teamDir)
+	nxtGrp++
+	return
 }
 
-func createTeams(teamDir *string) {
+// createTeams adds teams to github based on team files provided by students.
+// If a team file matches the specific format 'GroupXX-TeamID.txt' (a simple
+// rename from a .done file), this allows students to add more members to
+// their group.
+func createTeams(teamDir *string, nxtGrp int) {
 	teamFiles := filter(filesIn(*teamDir), func(file string) bool {
 		return strings.HasSuffix(file, "txt")
 	})
-	for grp, file := range teamFiles {
+
+	for i, file := range teamFiles {
+		nxtGrp += i
+		// group name, such as GroupXX
+		var name string
+		// the github assigned teamID
+		var teamID int
+		var err error
+		//TODO Optimize this regexp: number of digits in GroupXX is two
+		var validTeamFile = regexp.MustCompile(groupName + "[0-9][0-9]-[0-9]+.txt")
+		if validTeamFile.MatchString(file) {
+			// Check if the file has a valid groupXX name and teamID.
+			k := strings.TrimSuffix(file, ".txt")
+			l := strings.Split(k, "-")
+			name = l[0]
+			teamID, err = strconv.Atoi(l[1])
+			if err != nil {
+				// ignore files without group number or if the teamID is
+				// larger than the nxtGrp to be created
+				fmt.Printf("Ignoring file: %s\n", file)
+				continue
+			}
+		} else {
+			// Number of digits in XX in the GroupXX name is 2 (will use
+			// leading zeros if XX < 10)
+			name = fmt.Sprintf("%s%.2d", groupName, nxtGrp)
+			teamID = createTeam(name)
+		}
+
 		oldpath := filepath.Join(*teamDir, file)
 		b, err := ioutil.ReadFile(oldpath)
 		if err != nil {
 			panic(err)
 		}
 		members := strings.Split(strings.TrimSuffix(string(b), "\n"), "\n")
-		name := fmt.Sprintf("%s%d", groupName, grp+1)
-		teamID := createTeam(name)
+
 		addMembers(teamID, members)
-		// Mark the processed file by renaming it
-		newpath := strings.Replace(oldpath, ".txt", ".done", 1)
+		// Mark the processed file by renaming it: 'groupXX-teamID.done'
+		newfile := name + "-" + strconv.Itoa(teamID) + ".done"
+		newpath := filepath.Join(*teamDir, newfile)
 		err = os.Rename(oldpath, newpath)
 		if err != nil {
 			fmt.Println("Could not rename to:", newpath)
@@ -138,30 +206,21 @@ func createTeam(name string) int {
 		// something other than already exist happened
 		panic(err)
 	}
+	teams[name] = *team.ID
 	return *team.ID
-
 }
 
 func addMembers(teamID int, members []string) {
-	ms, _, err := client.Organizations.ListTeamMembers(teamID, nil)
-	if err != nil {
-		fmt.Println("Could be just no members yet??")
-		// panic(err)
-	}
-	users := make(map[string]bool)
-	for _, u := range ms {
-		users[*u.Login] = true
-	}
-
 	for _, member := range members {
-		if !users[member] {
-			_, err = client.Organizations.AddTeamMember(teamID, member)
+		if prevTID, exists := users[member]; !exists {
+			_, err := client.Organizations.AddTeamMember(teamID, member)
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf("Added %s to team id: %d\n", member, teamID)
+			fmt.Printf("Added '%s' to team: %d\n", member, teamID)
+			users[member] = teamID
 		} else {
-			fmt.Printf("Didn't add %s to team id: %d\n", member, teamID)
+			fmt.Printf("'%s' is already member of: %d\n", member, prevTID)
 		}
 	}
 }
