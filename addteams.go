@@ -16,33 +16,31 @@ import (
 // the default group name prefix; will be appended by a sequential group number
 const groupName = "group"
 
-//TODO: change to GITHUB_AUTH_TOKEN
-
 var usageString = `
 This program relys on setting some environment variables.
 
-The ACCESS_TOKEN env variable must be set to one of your personal access
+The GITHUB_AUTH_TOKEN env variable must be set to one of your personal access
 tokens generated on github. You will need to generate such a token on github:
 Go to Edit profile, Applications, Personal access tokens, Generate new token.
 You should save the token to a file .github-access-token, and set it in your
 .zshenv (or similar for your shell) file using:
 
-    export ACCESS_TOKEN=` + "`" + `cat $HOME/.github-access-token` + "`" + `
+    export GITHUB_AUTH_TOKEN=` + "`" + `cat $HOME/.github-auth-token` + "`" + `
 
 You may also want to run:
 
-    chmod 600 $HOME/.github-access-token
+    chmod 600 $HOME/.github-auth-token
 
-Next, you should also set the env variable COURSE_ORG to the name of the
+Next, you should also set the env variable GITHUB_ORG to the name of the
 organization that you have created for the course on github, e.g.:
 
-    export COURSE_ORG=uis-dat320-fall2014
+    export GITHUB_ORG=uis-dat320-fall2014
 
 Typically, this env will be updated once for every semester, but if you have
 multiple courses in one semester you can run the script prefixed with the env
 variable like so:
 
-    COURSE_ORG=uis-dat320-fall2014 addteams
+    GITHUB_ORG=uis-dat320-fall2014 addteams
 
 `
 
@@ -65,8 +63,8 @@ func main() {
 	}
 	flag.Parse()
 
-	token := os.Getenv("ACCESS_TOKEN")
-	courseOrg = os.Getenv("COURSE_ORG")
+	token := os.Getenv("GITHUB_AUTH_TOKEN")
+	courseOrg = os.Getenv("GITHUB_ORG")
 	if token == "" || courseOrg == "" {
 		flag.Usage()
 		os.Exit(0)
