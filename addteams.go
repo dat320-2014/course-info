@@ -19,6 +19,10 @@ import (
 const groupName = "Group"
 
 var usageString = `
+Program to add student teams and create repositories on github.com for use in
+courses that rely on github for handling lab exercise submissions (via pull
+requests) etc.
+
 This program relys on setting some environment variables.
 
 The GITHUB_AUTH_TOKEN env variable must be set to one of your personal access
@@ -44,6 +48,11 @@ variable like so:
 
     GITHUB_ORG=uis-dat320-fall2014 addteams
 
+Troubleshooting:
+
+** If you get a '404 Not Found []' message, please check that your personal
+   access token has the necessary priviliges, e.g. to delete a repository.
+
 `
 
 // globally accessible
@@ -60,6 +69,8 @@ var users = make(map[string]int)
 
 func main() {
 	teamDir := flag.String("dir", "teams", "directory with team files")
+	delTeams := flag.Bool("delete", false, "delete all teams/repos in course (for debugging)")
+	listRepos := flag.Bool("list", false, "list repos in course (for debugging)")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS]\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "\nOptions:\n")
@@ -80,23 +91,52 @@ func main() {
 	}
 	client = github.NewClient(t.Client())
 
-	org, _, err := client.Organizations.Get(courseOrg)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Found organization:", *org.Name)
+	if *listRepos {
+		org, _, err := client.Organizations.Get(courseOrg)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Found organization:", *org.Name)
 
-	repos, _, err := client.Repositories.ListByOrg(courseOrg, nil)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("With the following repositories:")
-	for _, r := range repos {
-		fmt.Printf("\t%v\n", *r.FullName)
+		repos, _, err := client.Repositories.ListByOrg(courseOrg, nil)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("With the following repositories:")
+		for _, r := range repos {
+			fmt.Printf("\t%s\n", *r.FullName)
+		}
+		os.Exit(0)
 	}
 
 	nxtGrp := loadExistingTeams()
+	if *delTeams {
+		deleteTeamsAndRepos()
+		os.Exit(0)
+	}
+
 	createTeams(teamDir, nxtGrp)
+}
+
+// delete teams and repos for those teams; make sure the the auth token has
+// the appropriate privileges before using this function.
+func deleteTeamsAndRepos() {
+	if len(teams) == 0 {
+		fmt.Println("Nothing to delete")
+		return
+	}
+	for name, id := range teams {
+		fmt.Println("Deleting repo:", name)
+		_, err := client.Repositories.Delete(courseOrg, name)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Deleting team:", id)
+		_, err = client.Organizations.DeleteTeam(id)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 // load existing teams and users and return the next group number to be added
@@ -106,13 +146,13 @@ func loadExistingTeams() (nxtGrp int) {
 		// ListTeams failed; not sure if this can happen if there are no teams??
 		panic(err)
 	}
-	for _, tname := range ts {
-		if *tname.Name == "Owners" {
+	for _, team := range ts {
+		if *team.Name == "Owners" {
 			// ignore the 'Owners' team
 			continue
 		}
-		fmt.Println("Found existing team:", *tname.Name)
-		m, err := strconv.Atoi(strings.TrimPrefix(*tname.Name, groupName))
+		fmt.Println("Found existing team:", *team.Name)
+		m, err := strconv.Atoi(strings.TrimPrefix(*team.Name, groupName))
 		if err != nil {
 			// ignore teams without a number at the end
 			continue
@@ -120,18 +160,18 @@ func loadExistingTeams() (nxtGrp int) {
 		if m > nxtGrp {
 			nxtGrp = m
 		}
-		teams[*tname.Name] = *tname.ID
-		ms, _, err := client.Organizations.ListTeamMembers(*tname.ID, nil)
+		teams[*team.Name] = *team.ID
+		ms, _, err := client.Organizations.ListTeamMembers(*team.ID, nil)
 		if err != nil {
 			panic(err)
 		}
 		for _, u := range ms {
 			if prevTID, exists := users[*u.Login]; exists {
 				fmt.Printf("Unable to add '%s' to team %d, already member of %d",
-					*u.Login, *tname.ID, prevTID)
+					*u.Login, *team.ID, prevTID)
 				continue
 			}
-			users[*u.Login] = *tname.ID
+			users[*u.Login] = *team.ID
 		}
 	}
 	nxtGrp++
@@ -146,33 +186,29 @@ func createTeams(teamDir *string, nxtGrp int) {
 	teamFiles := filter(filesIn(*teamDir), func(file string) bool {
 		return strings.HasSuffix(file, "txt")
 	})
+	//TODO Optimize this regexp: number of digits in GroupXX is two
+	var validTeamFile = regexp.MustCompile(groupName + "[0-9][0-9]-[0-9]+.txt")
 
-	for i, file := range teamFiles {
-		nxtGrp += i
+	for _, file := range teamFiles {
 		// group name, such as GroupXX
 		var name string
 		// the github assigned teamID
 		var teamID int
 		var err error
-		//TODO Optimize this regexp: number of digits in GroupXX is two
-		var validTeamFile = regexp.MustCompile(groupName + "[0-9][0-9]-[0-9]+.txt")
 		if validTeamFile.MatchString(file) {
 			// Check if the file has a valid groupXX name and teamID.
-			k := strings.TrimSuffix(file, ".txt")
-			l := strings.Split(k, "-")
+			l := strings.Split(strings.TrimSuffix(file, ".txt"), "-")
 			name = l[0]
-			teamID, err = strconv.Atoi(l[1])
-			if err != nil {
-				// ignore files without group number or if the teamID is
-				// larger than the nxtGrp to be created
-				fmt.Printf("Ignoring file: %s\n", file)
-				continue
-			}
+			teamID, _ = strconv.Atoi(l[1])
+			// here it is safe to ignore the err (_) since the regexp above
+			// will detect a non-number teamID in the file name.
 		} else {
 			// Number of digits in XX in the GroupXX name is 2 (will use
 			// leading zeros if XX < 10)
 			name = fmt.Sprintf("%s%.2d", groupName, nxtGrp)
 			teamID = createTeam(name)
+			createRepo(name, teamID)
+			nxtGrp++
 		}
 
 		oldpath := filepath.Join(*teamDir, file)
@@ -208,6 +244,25 @@ func createTeam(name string) int {
 	}
 	teams[name] = *team.ID
 	return *team.ID
+}
+
+// create a new private repository named name for the given team
+func createRepo(name string, team int) {
+	repo := &github.Repository{
+		Name:    github.String(name),
+		Private: github.Bool(false), // TODO Update once github has given me private repos
+	}
+	r, _, err := client.Repositories.Create(courseOrg, repo)
+	if err != nil {
+		fmt.Printf("Failed to create repo: %s: %v\n", name, err)
+		return
+	}
+	fmt.Printf("Created repository: %s for team %d;\n  URL: %s\n", name, team, *r.URL)
+	_, err = client.Organizations.AddTeamRepo(team, courseOrg, name)
+	if err != nil {
+		fmt.Printf("Failed to add team %d to repo: %s: %v\n", team, name, err)
+	}
+	fmt.Println("Added team to repository:", name)
 }
 
 func addMembers(teamID int, members []string) {
