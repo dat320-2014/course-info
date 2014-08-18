@@ -80,12 +80,12 @@ I will notify of any changes that may arise.
 
 ##Lab Overview
 
-| Lab    | Topic                           | Grading                | Deadline | 
-|:------:|---------------------------------|------------------------|:--------:|
-| 1      | Unix, programming tools and C   | Pass/Fail (not graded) | 31/8     |
-| 2      | Introduction to Go programming  | Pass/Fail (not graded) | 7/9      |
-| 3      | Network Programming with Go     | Pass/Fail (not graded) | 14/9     |
-| 4      | Threads and Protection          | Pass/Fail (not graded) | 21/9     |
-| 5      | Programming Tools               | Pass/Fail (not graded) | 5/10     |
-| 6      | Linux Kernel IO Driver          | Graded                 | 26/10    |
-| 7      | ChanStat: TV channel statistics | Graded                 | 16/11    |
+| Lab    | Topic                           | Grading   | Submission         | Deadline | 
+|:------:|---------------------------------|-----------|--------------------|:--------:|
+| 1      | Unix, programming tools and C   | Pass/Fail | Submit on your own | 31/8     |
+| 2      | Introduction to Go programming  | Pass/Fail | Submit on your own | 7/9      |
+| 3      | Network Programming with Go     | Pass/Fail | Submit on your own | 14/9     |
+| 4      | Threads and Protection          | Pass/Fail | Submit as group    | 21/9     |
+| 5      | Programming Tools               | Pass/Fail | Submit as group    | 5/10     |
+| 6      | Linux Kernel IO Driver          | Graded    | Submit as group    | 26/10    |
+| 7      | ChanStat: TV channel statistics | Graded    | Submit as group    | 16/11    |
