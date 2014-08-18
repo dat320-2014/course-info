@@ -4,8 +4,19 @@ The course is based on this [textbook](http://www.recursivebooks.com):
 Operating Systems: Principles and Practice, Tom Anderson and Mike Dahlin. 
 You do not need the second edition. I only have the beta edition still.
 
-All chapters listed below and Lab exercises 1-7 are syllabus. 
+All chapters listed below and lab exercises 1-7 are syllabus. 
 I will notify of any changes that may arise.
+
+| Ch. | Details                                               |
+|:---:|-------------------------------------------------------|
+| 1   | All, but in particular the concepts in 1.2.           |
+| 2   | All except 2.4 and 2.5. Sidebar on page 93 give a good summary. |
+| 3   | All except Windows proc. management on p. 108-109. |
+| 4   | All |
+| 5   | All except p. 221-225 (Linux 2.6 mutex lock). |
+|     | - Sidebars on p. 211 and p. 213-215 not important for exam. |
+|     | - *Rules listed on p. 237-239 are important.* |
+
 
 * Chapter 1: All, but in particular the concepts in 1.2.
 * Chapter 2: All except 2.4 and 2.5. Sidebar on page 93 give a good summary.
