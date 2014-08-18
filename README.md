@@ -13,9 +13,9 @@ I will notify of any changes that may arise.
 | 2   | All except 2.4 and 2.5. Sidebar on page 93 give a good summary. |
 | 3   | All except Windows proc. management on p. 108-109. |
 | 4   | All |
-| 5   | All except p. 221-225 (Linux 2.6 mutex lock). |
-|     | - Sidebars on p. 211 and p. 213-215 not important for exam. |
-|     | - *Rules listed on p. 237-239 are important.* |
+| 5   | All except p. 221-225 (Linux 2.6 mutex lock). Sidebars on p. 211 and p. 213-215 not important for exam. *Rules listed on p. 237-239 are important.*  |
+|     | -  |
+|     | - |
 
 
 * Chapter 1: All, but in particular the concepts in 1.2.
