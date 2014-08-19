@@ -26,10 +26,10 @@ I will notify of any changes that may arise.
 | W    |  Date | Chap. | Topic                                  | Teacher | Travels      |
 |:----:|:-----:|:-----:|----------------------------------------|:-------:|:------------:|
 |  35  |  25/8 |   1   | Introduction to Operating Systems      |  Morten |              |
-|      |  26/8 |   C   | Introduction to C programming          |  Morten |              |
+|      |  26/8 |       | Introduction to C programming          |  Morten |              |
 |      |  26/8 | Lab 1 | Unix, programming tools and C          |  Morten |              |
 |      |  31/8 |       | **[Lab 1 Handin](https://github.com/uis-dat320-fall2014/lab1)** |         |              |
-|  36  |  1/9  |   C   | Variables, pointers, and memory        |  Morten |              |
+|  36  |  1/9  |       | Variables, pointers, and memory        |  Morten |              |
 |      |  2/9  |   2   | The Kernel Abstraction                 |   Hein  |              |
 |      |  2/9  | Lab 2 | Introduction to Go programming         |   Hein  |              |
 |      |  7/9  |       | **Lab 2 Handin**                       |         |              |
