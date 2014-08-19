@@ -23,8 +23,8 @@ Slip days beyond the *five free days* will count negatively towards your lab gra
 ###Resubmission
 If any of the submitted lab handins are below passing level, you will be granted **one resubmission** per handin. Your grade will be reduced by
 
-* 5~points for the first resubmission
-* 10~points for the second resubmission
-* 20~points for the third resubmission
+* 5 points for the first resubmission
+* 10 points for the second resubmission
+* 20 points for the third resubmission
 
 A fourth resubmission will not be allowed, resulting in failing the lab.
