@@ -5,14 +5,15 @@
 |  35  |  25/8 |   1   | Introduction to Operating Systems      |  Morten |              |
 |      |  26/8 |       | Introduction to C programming          |  Morten |              |
 |      |  26/8 | Lab 1 | Unix, programming tools and C          |  Morten |              |
-|      |  31/8 |       | **[Lab 1 Handin](https://github.com/uis-dat320-fall2014/lab1)** |         |              |
 |  36  |  1/9  |       | Variables, pointers, and memory        |  Morten |              |
 |      |  2/9  |   2   | The Kernel Abstraction                 |   Hein  |              |
+|      |  2/9  | Lab 1 | Unix, programming tools and C          |  Morten |              |
 |      |  2/9  | Lab 2 | Introduction to Go programming         |   Hein  |              |
-|      |  7/9  |       | **Lab 2 Handin**                       |         |              |
+|      |  2/9  |       | **[Lab 1 Handin](https://github.com/uis-dat320-fall2014/lab1)** |         |              |
 |  37  |  8/9  |   3   | The Programming Interface              |   Hein  | Morten@CP    |
 |      |  9/9  |   4   | Concurrency and Threads                |   Hein  |     "        |
-|      |  9/9  | Lab 3 | Network Programming with Go            |   Hein  |     "        |
+|      |  9/9  |       | **Lab 2 Handin**                       |         |              |
+|      |  9/9  | Lab 3 | Network Programming with Go            |   Hein  |              |
 |      |  14/9 |       | **Lab 3 Handin**                       |         |              |
 |  38  |  15/9 |   4   | Concurrency and Threads                |   Hein  |              |
 |      |  16/9 |   5   | Synchronizing Access to Shared Objects |   Hein  |              |
