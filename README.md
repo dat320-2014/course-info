@@ -1,26 +1,3 @@
-##Tentative Syllabus
-
-The course is based on this [textbook](http://www.recursivebooks.com): 
-Operating Systems: Principles and Practice, Tom Anderson and Mike Dahlin. 
-You do not need the second edition. I only have the beta edition still.
-
-All chapters listed below and lab exercises 1-7 are syllabus. 
-I will notify of any changes that may arise.
-
-| Chapter | Details                                                                           |
-|:-------:|-----------------------------------------------------------------------------------|
-| 1       | All. The concepts in 1.2 are important.                                           |
-| 2       | All except 2.4 and 2.5. Sidebar on p. 93 gives a good summary.                    |
-| 3       | All except Windows process management on p. 108-109.                              |
-| 4       | All                                                                               |
-| 5       | All except p. 221-225 (Linux 2.6 mutex lock). Sidebars on p. 211 and p. 213-215 not important for exam. *Rules listed on p. 237-239 are important.* |
-| 6       | All except fig. 6.11 p. 276, fig. 6.13 p. 282, and p. 289-291 (Implementing RCU). *6.1 and 6.2: important.* |
-| 7       | All. 7.1 and 7.2: important. 7.3 not important for exam.                          |
-| 8       | All. 8.1-8.3: important. 8.4 not important for exam.                              |
-| 9       | All important.                                                                    |
-| 10-14   | Read on your own material; will not play a significant role on the exam.          |
-
-
 ##Lecture and Lab Plan
 
 | W    |  Date | Chap. | Topic                                  | Teacher | Travels      |
@@ -75,12 +52,12 @@ I will notify of any changes that may arise.
 
 ##Lab Overview
 
-| Lab    | Topic                           | Grading   | Submission         | Deadline | 
-|:------:|---------------------------------|-----------|--------------------|:--------:|
-| 1      | Unix, programming tools and C   | Pass/Fail | Submit on your own | 31/8     |
-| 2      | Introduction to Go programming  | Pass/Fail | Submit on your own | 7/9      |
-| 3      | Network Programming with Go     | Pass/Fail | Submit on your own | 14/9     |
-| 4      | Threads and Protection          | Pass/Fail | Submit as group    | 21/9     |
-| 5      | Programming Tools               | Pass/Fail | Submit as group    | 5/10     |
-| 6      | Linux Kernel IO Driver          | Graded    | Submit as group    | 26/10    |
-| 7      | ChanStat: TV channel statistics | Graded    | Submit as group    | 16/11    |
+| Lab | Topic                                                                          | Grading   | Submission         | Deadline | 
+|:---:|--------------------------------------------------------------------------------|-----------|--------------------|:--------:|
+| 1   | [Unix, programming tools and C](https://github.com/uis-dat320-fall2014/lab1)   | Pass/Fail | Submit on your own | 31/8     |
+| 2   | [Introduction to Go programming](https://github.com/uis-dat320-fall2014/lab2)  | Pass/Fail | Submit on your own | 7/9      |
+| 3   | [Network Programming with Go](https://github.com/uis-dat320-fall2014/lab3)     | Pass/Fail | Submit on your own | 14/9     |
+| 4   | [Threads and Protection](https://github.com/uis-dat320-fall2014/lab4)          | Pass/Fail | Submit as group    | 21/9     |
+| 5   | [Programming Tools](https://github.com/uis-dat320-fall2014/lab5)               | Pass/Fail | Submit as group    | 5/10     |
+| 6   | [Linux Kernel IO Driver](https://github.com/uis-dat320-fall2014/lab6)          | Graded    | Submit as group    | 26/10    |
+| 7   | [ChanStat: TV channel statistics](https://github.com/uis-dat320-fall2014/lab7) | Graded    | Submit as group    | 16/11    |
