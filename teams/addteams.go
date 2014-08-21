@@ -32,9 +32,9 @@ import (
 const groupName = "Group"
 
 var usageString = `
-Program to add student teams and create repositories on github.com for use in
-courses that rely on github for handling lab exercise submissions (via pull
-requests) etc.
+Program to add student teams (and create repositories if -repo provided) on
+github.com for use in courses that rely on github for handling lab exercise
+submissions (via pull requests) etc.
 
 This program relys on setting some environment variables.
 
@@ -84,10 +84,14 @@ var teams = make(map[string]int)
 // user name -> team id to which the user is already added
 var users = make(map[string]int)
 
+var (
+	teamDir   = flag.String("dir", "./", "directory with team files (with extension .grp)")
+	crRepo    = flag.Bool("repo", false, "also create repository")
+	delTeams  = flag.Bool("delete", false, "delete all teams/repos in course (for debugging)")
+	listRepos = flag.Bool("list", false, "list repos in course (for debugging)")
+)
+
 func main() {
-	teamDir := flag.String("dir", "teams", "directory with team files")
-	delTeams := flag.Bool("delete", false, "delete all teams/repos in course (for debugging)")
-	listRepos := flag.Bool("list", false, "list repos in course (for debugging)")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS]\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "\nOptions:\n")
@@ -196,15 +200,15 @@ func loadExistingTeams() (nxtGrp int) {
 }
 
 // createTeams adds teams to github based on team files provided by students.
-// If a team file matches the specific format 'GroupXX-TeamID.txt' (a simple
+// If a team file matches the specific format 'GroupXX-TeamID.grp' (a simple
 // rename from a .done file), this allows students to add more members to
 // their group.
 func createTeams(teamDir *string, nxtGrp int) {
 	teamFiles := filter(filesIn(*teamDir), func(file string) bool {
-		return strings.HasSuffix(file, "txt")
+		return strings.HasSuffix(file, "grp") && file != "example-team.grp"
 	})
 	//TODO Optimize this regexp: number of digits in GroupXX is two
-	var validTeamFile = regexp.MustCompile(groupName + "[0-9][0-9]-[0-9]+.txt")
+	var validTeamFile = regexp.MustCompile(groupName + "[0-9][0-9]-[0-9]+.grp")
 
 	for _, file := range teamFiles {
 		// group name, such as GroupXX
@@ -213,8 +217,9 @@ func createTeams(teamDir *string, nxtGrp int) {
 		var teamID int
 		var err error
 		if validTeamFile.MatchString(file) {
+			// Found file for an existing team (we may add more team members).
 			// Check if the file has a valid groupXX name and teamID.
-			l := strings.Split(strings.TrimSuffix(file, ".txt"), "-")
+			l := strings.Split(strings.TrimSuffix(file, ".grp"), "-")
 			name = l[0]
 			teamID, _ = strconv.Atoi(l[1])
 			// here it is safe to ignore the err (_) since the regexp above
@@ -224,7 +229,10 @@ func createTeams(teamDir *string, nxtGrp int) {
 			// leading zeros if XX < 10)
 			name = fmt.Sprintf("%s%.2d", groupName, nxtGrp)
 			teamID = createTeam(name)
-			createRepo(name, teamID)
+			if *crRepo {
+				// only create repo if command line option provided
+				createRepo(name, teamID)
+			}
 			nxtGrp++
 		}
 
