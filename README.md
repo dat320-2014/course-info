@@ -1,6 +1,6 @@
 ##Important: Sign up for Unix account
 
-To be effective in the lab on Tuesday, it is important that you sign up for an account on the Unix system prior to coming to the lab. The latest time to sign up is **Monday at 15:00**, in order to have your account ready for the lab on Tuesday. But there is no reason to delay; do it now! The instructions for sign up are here (http://user.ux.uis.no/)[http://user.ux.uis.no/].
+To be effective in the lab on Tuesday, it is important that you sign up for an account on the Unix system prior to coming to the lab. The latest time to sign up is **Monday at 15:00**, in order to have your account ready for the lab on Tuesday. But there is no reason to delay; do it now! The instructions for sign up are here http://user.ux.uis.no/.
 
 (Posted by Hein: Friday 22 Aug)
 
