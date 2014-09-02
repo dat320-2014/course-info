@@ -1,4 +1,17 @@
+##Lab 2 will be private
+
+**We will need your githut account name.** You should not fork the lab2 repo, when you get access to it. Instead we will create a separate repo for each of you. To give us your github account name, clone this repo, and add your account name to the file `students`, and do a *Pull request.* (see the README.md description for lab1 for instructions related to doing a Pull request.)
+
+(Posted by Hein: Tuesday 2 Sep)
+
+##Lab 1 Handin
+
+If you experience trouble with submitting lab 1 due to difficultites with git, don't worry. We will not write down any slip days due to this.
+
+(Posted by Hein: Tuesday 2 Sep)
+
 ##External access to the Linux machines
+
 Information about how to do a remote login to the Linux machines can be found here: http://wiki.ux.uis.no/foswiki/Info/WebHome and here: http://wiki.ux.uis.no/foswiki/Info/HvordanLoggeInnP%E5Unix-anlegget
 
 ##Important: Sign up for Unix account
