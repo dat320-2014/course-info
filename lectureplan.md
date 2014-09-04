@@ -12,16 +12,16 @@
 |      |  2/9  |       | **[Lab 1 Handin](https://github.com/uis-dat320-fall2014/lab1)** |         |              |
 |  37  |  8/9  |   3   | The Programming Interface                                       |   Hein  | Morten@CP    |
 |      |  9/9  |   4   | Concurrency and Threads                                         |   Hein  |     "        |
-|      |  9/9  |       | **[Lab 2 Handin](https://github.com/uis-dat320-fall2014/lab2)** |         |              |
 |      |  9/9  | Lab 3 | Network Programming with Go                                     |   Hein  |              |
-|      |  14/9 |       | **[Lab 3 Handin](https://github.com/uis-dat320-fall2014/lab3)** |         |              |
+|      |  14/9 |       | **[Lab 2 Handin](https://github.com/uis-dat320-fall2014/lab2)** |         |              |
 |  38  |  15/9 |   4   | Concurrency and Threads                                         |   Hein  |              |
 |      |  16/9 |   5   | Synchronizing Access to Shared Objects                          |   Hein  |              |
 |      |  16/9 | Lab 4 | Threads and Protection                                          |  Morten |              |
-|      |  21/9 |       | **[Lab 4 Handin](https://github.com/uis-dat320-fall2014/lab4)** |         |              |
+|      |  21/9 |       | **[Lab 3 Handin](https://github.com/uis-dat320-fall2014/lab3)** |         |              |
 |  39  |  22/9 |   5   | Synchronizing Access to Shared Objects                          |   Hein  | Morten@ICTSS |
 |      |  23/9 |   5   | Synchronizing Access to Shared Objects                          |   Hein  |     "        |
 |      |  23/9 | Lab 5 | Programming Tools                                               |   Hein  |     "        |
+|      |  28/9 |       | **[Lab 4 Handin](https://github.com/uis-dat320-fall2014/lab4)** |         |              |
 |  40  |  29/9 |   6   | Advanced Synchronization                                        |   Hein  |              |
 |      |  30/9 |   6   | Advanced Synchronization                                        |   Hein  | Morten@Oslo  |
 |      |  30/9 | Lab 5 | Programming Tools                                               |   Hein  |              |
