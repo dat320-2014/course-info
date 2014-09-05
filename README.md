@@ -1,3 +1,9 @@
+##Lab repositories update
+
+If you find your repo for lab2 missing, it has most likely been deleted (the remaining will be deleted soon). The reason for deleting, see below.
+
+(Posted by Hein: Friday 5 Sep)
+
 ##Lab repositories
 
 Hey all. Due to a misunderstanding of github's instructions, I have created too many repositories (one per student per lab exercise). This does not scale, and yesterday we ran out of private repositories. Thus, we will instead be creating only one repository for all lab exercises, with lab2 and lab3 etc as subfolders. Thus, those who have already been given a repo for lab2, this will be deleted. If you have made changes locally related to lab2, please take care to keep your local copy safe, so that you can move those changes over to the new copy later. I will start to create new repositories soon, and I'm asking that you please begin using the new `username-labs` repos.
