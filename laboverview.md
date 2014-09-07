@@ -2,7 +2,7 @@
 
 | Lab | Topic                                                                          | Grading   | Submission         | Deadline | 
 |:---:|--------------------------------------------------------------------------------|-----------|--------------------|:-----:|
-| 1   | [Unix, programming tools and C](https://github.com/uis-dat320-fall2014/labs)   | Pass/Fail | Submit on your own | 2/9   |
+| 1   | [Unix, programming tools and C](https://github.com/uis-dat320-fall2014/lab1)   | Pass/Fail | Submit on your own | 2/9   |
 | 2   | [Introduction to Go programming](https://github.com/uis-dat320-fall2014/labs)  | Pass/Fail | Submit on your own | 14/9  |
 | 3   | [Network Programming with Go](https://github.com/uis-dat320-fall2014/labs)     | Pass/Fail | Submit on your own | 21/9  |
 | 4   | [Threads and Protection](https://github.com/uis-dat320-fall2014/labs)          | Pass/Fail | Submit on your own | 28/9  |
