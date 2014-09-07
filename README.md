@@ -1,3 +1,9 @@
+##Lab handin deadlines postponed
+
+Due to the problems with github, we will be postponing the deadline for lab 2 until Sunday 14th, and likewise for the next labs. Please consult the lecture plan for the details. Tomorrow I'll walk through a few examples with git and github to explain a few things. I have also found a new room which should also have better space and facilities. For those who read this, please let others know that we will meet in E458 (across the hall from the eletro-lab).
+
+(Posted by Hein: Sunday 7 Sep)
+
 ##Lab repositories update
 
 If you find your repo for lab2 missing, it has most likely been deleted (the remaining will be deleted soon). The reason for deleting, see below.
