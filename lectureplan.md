@@ -12,7 +12,7 @@
 |  37  |  8/9  |   3   | The Programming Interface                                       |   Hein  | Morten@CP    |
 |      |  9/9  |   4   | Concurrency and Threads                                         |   Hein  |     "        |
 |      |  9/9  | Lab 2 | Introduction to Go programming                                  |   Hein  |              |
-|      |  14/9 |       | **[Lab 2 Handin](https://github.com/uis-dat320-fall2014/lab2)** |         |              |
+|      |  14/9 |       | **[Lab 2 Handin](https://github.com/uis-dat320-fall2014/labs/lab2)** |         |              |
 |  38  |  15/9 |   4   | Concurrency and Threads                                         |   Hein  |              |
 |      |  16/9 |   5   | Synchronizing Access to Shared Objects                          |   Hein  |              |
 |      |  16/9 | Lab 3 | Network Programming with Go                                     |   Hein  |              |
