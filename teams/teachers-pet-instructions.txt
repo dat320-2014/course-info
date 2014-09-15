@@ -1,0 +1,15 @@
+Create student teams (one per student; assuming there is a file named 'students' in the current folder):
+  teachers_pet create_student_teams --organization=uis-dat320-fall2014
+
+Create 'labs' repositories for all the students in 'students' file:
+  teachers_pet create_repos --organization=uis-dat320-fall2014 --repository=labs
+
+Push files to each students' 'labs' repo (files are pushed from local folder):
+  teachers_pet push_files --organization=uis-dat320-fall2014 --repository=labs
+
+Create team with all students:
+  teachers_pet add_to_team --members=students --organization=uis-dat320-fall2014
+
+(Find the students team on github, select Settings for the team, and set it to only have Read Access.)
+Using this team will allow students to do 'go get github.com/uis-dat320-fall2014/labs'
+

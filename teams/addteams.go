@@ -88,6 +88,7 @@ var (
 	teamDir   = flag.String("dir", "./", "directory with team files (with extension .grp)")
 	crRepo    = flag.Bool("repo", false, "also create repository")
 	delTeams  = flag.Bool("delete", false, "delete all teams/repos in course (for debugging)")
+	dellab  = flag.Bool("dellab", false, "delete lab2 repos in course (for debugging)")
 	listRepos = flag.Bool("list", false, "list repos in course (for debugging)")
 )
 
@@ -126,6 +127,25 @@ func main() {
 		fmt.Println("With the following repositories:")
 		for _, r := range repos {
 			fmt.Printf("\t%s\n", *r.FullName)
+		}
+		os.Exit(0)
+	}
+	if *dellab {
+		repos, _, err := client.Repositories.ListByOrg(courseOrg, nil)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("With the following repositories:")
+		for _, r := range repos {
+			fmt.Printf("\t%v\n", *r.Name)
+			
+			// if strings.HasSuffix(*r.FullName, "-lab2") {
+			// 	fmt.Println("Deleting repo:", *r.Name)
+			// 	_, err := client.Repositories.Delete(courseOrg, *r.Name)
+			// 	if err != nil {
+			// 		panic(err)
+			// 	}
+			// }
 		}
 		os.Exit(0)
 	}
