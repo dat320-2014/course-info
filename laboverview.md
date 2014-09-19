@@ -6,6 +6,6 @@
 | 2   | [Introduction to Go programming](https://github.com/uis-dat320-fall2014/labs/tree/master/lab2)  | Pass/Fail | Submit on your own | 14/9  |
 | 3   | [Network Programming with Go](https://github.com/uis-dat320-fall2014/labs/tree/master/lab3)     | Pass/Fail | Submit on your own | 21/9  |
 | 4   | [Programming Tools](https://github.com/uis-dat320-fall2014/labs/tree/master/lab4)          | Pass/Fail | Submit on your own | 28/9  |
-| 5   | [Threads and Protection](https://github.com/uis-dat320-fall2014/labs/tree/master/lab5)               | Pass/Fail | Submit on your own | 5/10  |
-| 6   | [Linux Kernel IO Driver](https://github.com/uis-dat320-fall2014/labs/tree/master/lab6)          | Graded    | Submit as group    | 26/10 |
+| 5   | [Threads and Protection](https://github.com/uis-dat320-fall2014/labs/tree/master/lab5)               | Pass/Fail | Submit on your own | 12/10  |
+| 6   | [Linux Kernel IO Driver](https://github.com/uis-dat320-fall2014/labs/tree/master/lab6)          | Graded    | Submit as group    |  2/11 |
 | 7   | [ChanStat: TV channel statistics](https://github.com/uis-dat320-fall2014/labs/tree/master/lab7) | Graded    | Submit as group    | 16/11 |
