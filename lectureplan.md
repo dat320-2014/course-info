@@ -16,28 +16,28 @@
 |  38  |  15/9 |   4   | Concurrency and Threads                                         |   Hein  |              |
 |      |  16/9 |   5   | Synchronizing Access to Shared Objects                          |   Hein  |              |
 |      |  16/9 | Lab 3 | Network Programming with Go                                     |   Hein  |              |
-|      |  21/9 |       | **[Lab 3 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab3)** |         |              |
+|      |  21/9 |       | **[Lab 3 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab3)** |         |           |
 |  39  |  22/9 |   5   | Synchronizing Access to Shared Objects                          |   Hein  | Morten@ICTSS |
 |      |  23/9 |   5   | Synchronizing Access to Shared Objects                          |   Hein  |     "        |
-|      |  23/9 | Lab 4 | Threads and Protection                                          |  Morten |              |
-|      |  28/9 |       | **[Lab 4 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab4)** |         |              |
+|      |  23/9 | Lab 4 | Programming Tools                                               |  Hein   |              |
+|      |  28/9 |       | **[Lab 4 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab4)** |         |           |
 |  40  |  29/9 |   6   | Advanced Synchronization                                        |   Hein  |              |
 |      |  30/9 |   6   | Advanced Synchronization                                        |   Hein  | Morten@Oslo  |
-|      |  30/9 | Lab 5 | Programming Tools                                               |   Hein  |              |
-|      |  5/10 |       | **[Lab 5 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab5)** |         |              |
+|      |  30/9 | Lab 5 | Threads and Protection                                          |   Hein  |              |
 |  41  |  6/10 |       | *No lectures*                                                   |  Morten | Hein@OSDI    |
 |      |  7/10 |       | *No lectures*                                                   |  Morten |     "        |
-|      |  7/10 | Lab 6 | Linux Kernel IO Driver                                          |  Morten |     "        |
+|      |  7/10 | Lab 5 | Threads and Protection                                          |  Morten |     "        |
+|      | 12/10 |       | **[Lab 5 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab5)** |         |           |
 |  42  | 13/10 |       | *No lectures*                                                   |  Morten | Hein@DISC    |
 |      | 14/10 |       | *No lectures*                                                   |  Morten |     "        |
 |      | 14/10 | Lab 6 | Linux Kernel IO Driver                                          |  Morten |     "        |
 |  43  | 20/10 |   7   | Scheduling                                                      |   Hein  |              |
 |      | 21/10 |   7   | Scheduling                                                      |   Hein  |              |
 |      | 21/10 | Lab 6 | Linux Kernel IO Driver                                          |  Morten |              |
-|      | 26/10 |       | **[Lab 6 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab6)** |         |              |
 |  44  | 27/10 |   8   | Address Translation                                             |   Hein  |              |
 |      | 28/10 |   8   | Address Translation                                             |   Hein  |              |
-|      | 28/10 | Lab 7 | ChanStat: TV channel statistics                                 |   Hein  |              |
+|      | 28/10 | Lab 6 | Linux Kernel IO Driver                                          |  Morten |              |
+|      |  2/11 |       | **[Lab 6 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab6)** |       |       |
 |  45  |  3/11 |   9   | Caching and Virtual Memory                                      |   Hein  |              |
 |      |  4/11 |   9   | Caching and Virtual Memory                                      |   Hein  |              |
 |      |  4/11 | Lab 7 | ChanStat: TV channel statistics                                 |   Hein  |              |
