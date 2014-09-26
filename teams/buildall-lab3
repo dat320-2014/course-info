@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+# Run as: ./buildall &> lab3-build.log
+#
+
+BASE=`pwd`
+
+for i in *-labs; do
+	cd $BASE
+
+    if [ -d $BASE/$i/lab3 ]; then
+  	  echo "\n=========\nBuilding files for $i..."
+  	  cd $BASE/$i/lab3/kvstore
+  	  echo `pwd`
+  	  diff -w -q -s -x kvstore -x main.go . $BASE/meling-labs/lab3/kvstore
+  	  go build
+  	  BUILD=$?
+  	  if [ $BUILD -ne 0 ]; then
+  	        echo "go build failed: kvstore ($i)"
+  	  fi
+
+  	  cd $BASE/$i/lab3/techo
+  	  echo `pwd`
+  	  diff -w -q -s -x techo -x echo.go -x echo_server.go . $BASE/meling-labs/lab3/techo
+  	  go build
+  	  BUILD=$?
+  	  if [ $BUILD -ne 0 ]; then
+  	        echo "go build failed: techo ($i)"
+  	  fi
+
+  	  cd $BASE/$i/lab3/uecho
+  	  echo `pwd`
+  	  diff -w -q -s -x uecho -x echo.go -x echo_client.go . $BASE/meling-labs/lab3/uecho
+  	  go build
+  	  BUILD=$?
+  	  if [ $BUILD -ne 0 ]; then
+  	        echo "go build failed: uecho ($i)"
+  	  fi
+  	  echo "Completed checking: $i...\n========="
+    else
+  	  echo "No lab3 found in $i"	  
+    fi
+
+done
+
