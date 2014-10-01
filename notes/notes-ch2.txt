@@ -1,0 +1,168 @@
+- Process concept
+- Dual-mode operation: user vs kernel mode
+- Privileged instructions
+- Memory protection
+- Hardware timer to prevent a process from consuming all CPU resources
+
+Hardware timer (timer interrupts)
+
+When a user process runs: it is free to execute any 
+  non-privileged instructions, call functions in its
+  memory region. Can write inifinte loops!
+  
+  Process isolation: Needs or must prevent that one
+  process consumes all CPU cycles.
+  
+  If a user process enters an infinite loop (or user
+  becomes inpatient and wants to stop the process).
+  The OS must be able to regain control of the CPU.
+  
+  Need HW timer support for this!
+  
+  Timer periodically interrupt the CPU.
+  - Return control to the kernel timer interrupt handler.
+  - Interrupt frequency set by the kernel
+  - Interrupt can be temporarily deferred (disable interrupts)
+  	- Only by the kernel
+	- Curicial for implementing mutual exclusion (locks)
+	
+
+Ch. 2.3 Safe transfer of control (mode switch)
+
+-> Safe way to switch from user mode to kernel mode and vice versa.
+
+- From user-mode to kernel-mode	
+
+  - Interrupts
+  	- Triggered by timer and I/O devices
+	  (e.g. I/O device may notify the kernel of completion
+	   of an I/O request)
+	  Ex. packet arrived at the NIC, generates an interrupt
+	  at the CPU, allowing the CPU to fetch the packet from
+	  the NIC over the databus.
+  - Exceptions
+  	- Triggered unexpected events (e.g. buggy or malicous)
+	  behavior.
+  - System calls (aka protected procedure calls)
+    - Request by a program for kernel to do some operation
+	  on its behalf.
+	- Only limited # of carefully selected entry points
+	- SYSCALL (special trap instruction)
+
+Interrupt: Allows asynchronous events to be handled.
+(happen independly from regular program execution)
+
+Exceptions/Syscalls: Synchronous events.
+(they happen immediately within the regular program execution)
+
+
+From kernel-mode to user-mode
+- New process/thread start
+  - Jump to the first instruction in program/thread
+- Return from interrupt, exception, or system call
+  - Resume suspended exection
+- Process/thread context switch
+  - Resume some other process
+- User-level upcall
+  - Asynchronous notification to user program
+  
+Safe mode switch
+How do we take interrupts safely?
+
+- Interrupt vector table
+  - Limited number of entry points into the kernel
+  - Table set up by OS kernel
+  - Contains pointers to code (or handlers) that run
+    in response to different events.
+
+Q: What could happen if a user entered the kernel at
+   an arbitrary location?
+A: A user could skip security checks put in place by
+   the kernel allowing any user to get privileged
+   access to any resources managed by the kernel.
+   
+- Kernel interrupt stack (in kernel memory)
+  Actually most OSes allocate a kernel interrupt
+  stack per user process
+  - This makes it easier to implement kernel code,
+    since it can also be interrupted.
+  - Can also call other system calls or handle exceptions.
+
+- Interrupt masking
+  - If already running in an interrupt handler.
+    We want to avoid taking another interrupt!
+  - Interrupt handler runs with interrupt off
+  	- Handler must be non-blocking
+	  (cannot wait for I/O)
+	- It must run to completion.
+	  - Minimum code necessary to allow the next interrupt
+	- Reenable interrupts after completion
+  - OS kernel can also turn off interrupts
+    - e.g. when determine the next process/thread to run
+	- If defer interrupts too long,
+	  can drop of I/O events (interrupts are actually queued)
+
+- Atomic transfer of control
+  - Single instruction to change
+    - Program counter (instruction pointer)
+	- Stack pointer
+	- Memory protection
+	- Kernel/user mode
+
+Example: On interrupt on x86:
+	- Save current SP
+	- Save current PC
+	- Save current processor status word (condition codes)
+	- Switch to kernel stack; put SP, PC, PSW on stack
+	- Switch to kernel mode (set bit in EAFLAGS)
+	- Vector through interrupt table
+	- Interrupt handler saves the CPU registers
+	  that it might change
+	  
+At end of handler:
+	- Handler restore saved registers
+	- Atomically return to interrupted process/thread
+		- Restoring PC, SP, PSW
+		- Switch to user mode
+
+System Calls
+
+When a process needs to do something that is outside
+its protection domain, the process needs to ask the
+OS kernel to do the task on its behalf. This is done
+via system calls.
+
+Examples: create new process, read from the keyboard,
+read/write to a disk block.
+
+- Kernel System Call Handler
+  - Local arguments
+  	- In register or on user stack
+  - Copy arguments
+  	- From user memory to kernel memory
+	- Protect kernel from malicous code
+	  evading security checks (TOCTOU attack)
+  - Valid arguments
+  	- Protect kernel from errors in user code
+  - Copy results back
+  	- into user memory
+
+
+Upcall: User-level interrupts
+
+- Unix: Signals (Windows: asynchronous events)
+	- Notify user process of event 
+	  that needs to be handled right away
+		- Time-slice for user-level thread manager
+		- Asynchronous I/O notifications
+			- Call upcall handler when I/O operation is complete
+			- (user process)
+	- Direct analogue to kernel interrupts
+		- Signal handler - fixed entry points
+		  (process defines its own handlers)
+		  (or the kernel can use default handlers)
+		- Separate signal stack
+		- Automatic save/restore of registers - transparent resume
+		- Signal masking: disable signals, while in a signal handler
+
+

@@ -1,0 +1,281 @@
+Ch. 4 Concurrency and Threads
+
+Human programmers are used to think sequentially!
+
+Motivation:
+- Operating systems need to be able 
+  to handle multiple things at once (MTAO)
+- Servers need handle MTAO
+  - multiple client connections
+- Parallel programs need to handle MTAO
+  - to achieve better performance
+- Programs with user interfaces need to handle MTAO
+  - to achieve user responsiveness
+- Network and disk bound programs need to handle MTAO
+  - To hide network/disk latency
+  
+How can we as sequential thinkers even think about a program
+where dozens of things happen at once?
+
+Computer systems must provide programmers with
+- abstraction for expressing and managing concurrency
+
+
+4.1 Threads: Abstraction and interface
+
+Threads: a core abstraction for concurrency.
+
+- A thread defines a task to be exceuted
+  (concurrently with other tasks)
+- Write code of a task as standard, sequential code.
+- In program: represent each concurrent task as a thread
+
+
+Threads virtualize the processor
+- provides the illusion that a program has an inifinte
+  number of virtual processors at its disposal.
+- The task/thread appears to have its own processor.
+
+- Job of the OS:
+	- multiplex all threads onto the physical processor(s)
+	- transparently suspend/resume threads
+- Threads execute at variable speed
+	- Programs must be designed to work with any schedule
+
+
+Example uses of threads:
+- Program structure: Express logical concurrent tasks
+	- One or more Producer tasks and one or more Consumer tasks
+	- Network server handling multiple clients
+
+- Performance: Exploiting multiple processors
+  (parallel programming)
+  - Programs can run faster by splitting their code
+    into parallizable tasks
+  - Example: Do the same task on different
+    portions of the input space
+  - Example: Google earth map scenes
+  - This is called: Embarrassingly parallel
+**- Example that is not embarrassingly parallel:
+    matrix multiplication!
+
+- Performance: Coping with high-latency (slow) I/O devices
+  - When one task is waiting for I/O to finish,
+    let another task run on the processor.
+	
+Threads: Definition and Properties
+
+Address space: All the state needed to run a program. 
+All the addresses that can be touched by the program
+
+Keyword: Protection.
+
+Thread: A separately scheduable sequential execution stream
+        within a process
+
+  separately scheduable: OS can run, suspend, or resume a thread
+     at any time.
+	 Main point: virtualize CPU, each thread 
+	             thinks it has its own CPU.
+	 On uniprocessor: all threads share the same physical CPU.
+	 On multicore: many more threads than CPU cores.
+	 
+  sequential execution stream: normal programming abstraction
+  
+  abstraction: each thread runs on virtual CPU at 
+     unpredictal speed
+  
+  by assuming unpredicatable speed:
+  - simplifies programming model
+    (no need to think about timing)
+  - physical reality - lots of factors infulence scheduling
+  
+- Protection is an orthogonal concept to threads (concurrency)
+  - Can have one or many threasd per protection domain (process)
+  - Single threaded user programs
+  	 - one thread and one protection domain
+  - Multi-threaded user program:
+  	 - multiple threads
+	 - sharing the same data structures
+	 - isolated from other user programs (process)
+	 - threads of the same program can all touch the same
+	   data structures,
+	   - There is no protection within a program.
+	   - Need Locks.
+     - separate processes are protected from each other by 
+	   the HW/OS, so they don't NEED locks, since they 
+	   don't share any data structures!!
+
+
+Programmers versus Processor view
+
+Programmers view:
+x=x+1;
+y=y+x;
+z=x+5y;
+
+Possible execution #1
+x=x+1;
+y=y+x;
+z=x+5y;
+  
+Possible execution #2
+x=x+1;
+Thread suspended
+Other thread(s) run
+Thread is resumed
+y=y+x;
+z=x+5y;
+  
+Possible execution #3
+x=x+1;
+y=y+x;
+Thread suspended
+Other thread(s) run
+Thread is resumed
+z=x+5y;
+  
+Because x is stored in memory possibly shared with other threads,
+these other threads could read/update x. And that update could
+result in loss of data/information, since the increment could be
+reset.
+
+x=x+1;
+
+LDA x, D0
+Thread suspended
+Other thread(s) run
+Thread is resumed
+INC D0
+STA D0, x
+
+Data race
+
+
+-----
+Cooperative Multithreading vs Preemptive Multithreading
+
+Cooperative MT: thread runs without interruption until IT
+  relinquishes the CPU to another thread.
+- Advantage: Increased control over interleavings among threads
+- Signficant disadvantage: Long running thread can monopolize
+  the CPU, starving other threads 
+  (making user interface sluggish or non-responsive)
+- Used in early versions of MacOS.
+
+Preemptive Multithreading: A running thread can be preempted
+  without explicitly relinquishing the CPU.
+
+4.2 Simple API and example
+
+sthreads API: Simple threads.
+ Wrapper around pthread (Posix Threads)  
+
+sthread_fork(func, args)
+  - create a new thread to run func(args)
+
+sthread_yield()
+  - relinquish the CPU voluntarily.
+
+sthread_join(thread)
+  - In parent, wait for the forked thread to exit
+
+sthread_exit()
+  - Quit thread and clean up, wake up joiner if any.
+  
+4.3 Thread internals
+
+How to implement threads?
+Four concepts:
+1) Per-thread state (ThreadLocal) vs shared state
+2) Thread Control Block
+3) Dispatch / Switch
+4) Thread create/delete
+
+Thread Control Block (TCB) and per-thread state
+TCB is the data structure that holds a thread's state
+- state of the computation
+- metadata about the thread (used to manage the thread)
+
+-----
+
+Per-thread computation state
+
+- Thread's stack: Stores information needed by 
+  nested functions called by the thread
+  - Ex. thread calls main() calls foo() calls bar() calls bas()
+- Copy of processor's registers
+  - data and address registers used by the compution
+  - PC, SP, and other special purpose registers
+- Per-thread metadata:
+  - ThreadID
+  - Scheduling priority
+
+Summary of thread lifecycle states:
+
+Ready: After thread created, placed in Ready state
+       (available to run, but not running)
+	   At any time the scheduler can cause the thread
+	   to transition to 'Running'.
+	   This is done by copying the thread's register
+	   values from the TCB to the processor's registers.
+	   
+Running: A thread in Running state is running on processor.
+         The thread's register values are now stored in the
+		 CPU registers rather than the TCB data structure.
+		 Two ways to transition from Running to Ready:
+		 - OS scheduler can preempt the running thread
+		   and move it to Ready state
+		 - Voluntarily relinquish the processor by
+		   calling yield()  
+
+Waiting: Thread is waiting for some event, and is not eligible
+         to run. Must first become Ready. 
+		 
+
+Fork-Join Parallelism
+- Parent fork/create threads
+- Parent join (wait for child threads to complete)
+- Synchronization
+  (a) parent writes state before starting child threads
+  (b) child can write while running
+  (c) parent can read result after join returns
+
+Example: Parallel zeroing of memory
+(embarrasingly parallel operation)
+
+For this application (zeroing memory), we don't need
+locks if we follow the rules: Each thread only touches
+a per-assigned address space region.
+
+
+Ch. 4.4 Implementation Details
+
+Thread context switch: copy currently running thread's registers
+  from the processor to the thread's TCB and then copying the
+  other thread's registers from that thread's TCB to the processor.
+
+How to switch the thread that is Running:
+- Just like an interrupt handler
+- But instead of restoring the state of the interrupted thread,
+  restore the state of some OTHER thread.
+
+
+Important General Principle in System Design:
+
+** Separate mechanism from policy
+
+Ex: Thread Context Switching:
+- Separate the mechanism of 'How to switch between threads'
+  from the policy of 'Which thread to run next'
+
+Mechanism always works, no matter what policy is used!
+
+
+ 
+   
+  
+  
+  
+  
+  

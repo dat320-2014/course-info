@@ -1,0 +1,213 @@
+Ch. 3 The Programming Interface
+
+What functions do we need an operating system to 
+provide to applications?
+
+- Access rights : Authentication 
+- Memory management :
+- I/O device managment:
+- Process management:
+- Thread management
+- File systems and storage
+- Graphics and windows management
+
+Where should these functions be places?
+
+- User-level program
+	- Login program
+	- Managing user's processes 
+	  ps, top, kill, Task Manager
+- User-level library (linked into user programs)
+	- User interface widgets
+- Kernel
+	- Accessed through system calls
+	- Typically: low-level process management, 
+	  file system, network stack impl. and so on.
+- Server
+	- Accessed through system calls
+	- Implemented as standalone server process
+	- Invoked by the kernel
+	- Window Manager
+
+Where to place functionality: Trade-off between:
+
+- Flexibility: Much easier to develop code for 
+  execution outside the kernel.
+
+- Reliability: Want to keep kernal minimal 
+  (few lines of code gives fewer bugs)
+
+- Performance:
+  - More expensive to transfer control to kernel
+    than regular procedure call
+
+- Safety: Resource management and protection:
+  Must be implemented in the kernel.
+
+
+Ch. 3.1 Process Management
+
+Shell: job control system
+- interactively
+- batch
+(tasks: sequence of steps)
+
+stdin  stdout  stderr
+
+Process State Diagram (goes here)
+Important for exam!
+
+
+Unix System Calls for Process Management
+
+On Windows: CreateProcess()
+
+On Unix:
+
+fork(): system call to create a copy of
+        the current process and start running it.
+		(takes no arguments)
+
+exec(): system call to change the program
+        being run by the current process
+	- Typically done child process right after a fork().
+	- To start running a new program (with different code than
+	  the current process that started it using fork().)
+
+Ch. 3.2 Input/Output
+
+Basic idea of the Unix I/O interface:
+
+- Uniformity: All operations on all files and devices
+  use the same set of system calls: 
+    open(), close(), read(), write()
+
+- Open() before use:
+  - Set up file, device, comm.channel data structures before use
+  - Check permissions 
+  - Return a handle for use in later calls on the file/device.
+
+- Byte-oriented
+  - All access through byte arrays
+  - (natural for block devices such as disks)
+  - also for communication channels: typically stream data
+
+- Kernel-buffered read
+  - Stream data (e.g. keyboard or network) stored in kernel
+  - Returned to application on read() request
+  - (Allows uniform access interface also for streamed data)
+  - If no data available
+    - read() block until data arrives
+	- may relinquish the CPU to other processes
+	  while waiting for data
+
+- Kernel-buffered write
+  - Similar for writing: store data in kernel until device
+    becomes available.
+  - Normally, write() copies data to kernel buffer, and
+    return immediately
+  	- Decouples application from the device
+	- App can proceed at its own speed (don't have to wait
+	  for the device to apply its write)
+  - If writing is too fast for the output device
+    - kernel buffer will fill up
+	- write() system call will block until more room becomes
+	  available in the kernel buffer
+	  
+- Explicit close()
+  - To garbage collect the open file descriptors (handles)
+    and free up allocated kernel buffers
+
+For Interprocess Communication (IPC)
+- Pipes (Unix pipes) (or Unix Domain Sockets)
+  - Kernel buffer with two handles
+    - One for writing (data into the pipe)
+	- One for reading (data out of the pipe)
+  - Data is buffered and this allows
+    - Producer and consumer of the data to be decoupled
+	  (important principle)
+	  (it reduces waiting in the common case)
+
+
+Ch. 3.5 Operating System Structure
+
+How to handle dependencies between different parts
+(modules) of the OS?
+
+- Many modules depend on synchronizion for coordinating
+  access to shared data structures in the kernel.
+- Virtual memory system depend on
+  low-level HW for address translation
+- File system and virtual memory system share common blocks
+  in physical memory and so on...
+
+Trade-off: centralizing functionality (modules) in kernel
+- improves performance
+- easier to integrate kernel modules
+- but is less flexible, difficult to change, less adaptive
+  to application needs.
+
+- Monolithics kernels
+  - Windows
+  - MacOS
+  - Linux (dynamically loadable modules)
+
+- Micro-kernels
+  - Windows NT first release (was almost micro-kernel)
+
+- Hardware Abstraction Layer (HAL)
+  - Portal interface to processor-specific operations within
+    the kernel
+  - Porting OS to new computer, involves creating a new HAL
+    implementation
+
+- Dynamically loadable device drivers (loadable modules)
+  - To keep the rest of the kernel portable
+  - Device driver: SW to manage a specific device,
+    interface, chipset
+  - Use standard interface defined by the kernel
+  - Problems with loadable modules
+    - Errors in device driver can corrupt 
+	  OS kernel and application data
+	- Attacker: can use device drivers to gain kernel access
+	- Study: 90% of system crashes is due to bugs in dev.driv.
+  - Solutions:
+    - Code inspection
+	- Bug tracking
+	- *User-level device drivers
+		- Buggy driver will only affect its own data structure
+	- *Virtual machine device drivers
+	- Driver sandboxing
+		- Run device drivers in their own restricted
+		  execution environment in kernel (ch. 8)
+
+Microkernel
+
+- Benefits:
+  - Easier to extend a m-kernel
+  - Easier to port the OS to new architectures
+  - More reliable (less code is running kernel mode)
+  - More secure
+  - Microkernel servers have access to
+  	- user-level API and
+	- low-level memory granted to it by the microkernel
+
+- Drawbacks:
+  - Performance overhead of 
+    user-space to kernel-space communcation
+
+Practice: A hybrid approach is used!
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  

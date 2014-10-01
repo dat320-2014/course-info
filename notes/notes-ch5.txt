@@ -1,0 +1,430 @@
+Ch. 5 Synchronizing Access to Shared Objects
+(shared memory) (shared state) (state data)
+
+Only independent threads that operate on completely separate
+subsets of state, i.e. memory, then we can reason about each
+thread separately.
+
+This is as if each thread is a single seqential program.
+We don't need to synchronize memory access.
+
+However, most multithreaded (MT) programs consist of cooperating
+threads that read and write to shared state (memory).
+
+When we have cooperating threads acccessing shared state,
+programming becomes much more difficult.
+
+The sequential model for reasoning about (cooperating) threads
+breaks down when:
+1. Program execution depends on the interleavings of the
+   thread's access to shared state.
+   Ex. Thread T1 writes value 1 to x, 
+       thread T2 writes value 2 to x. Final value depends on
+	   which threads' write operation finishes last.
+2. Program execution can be non-deterministic (randomness)
+   (different runs of the same program can produce different
+    results)
+   a. Scheduler may make different scheduling decisions
+   b. Processor may run at (slightly) different frequencies.
+   c. Another concurrent process may affect the cache hit rate.
+   d. Running program with a debugger
+   e. Recompiling with the -g instead -O options.
+
+   Jim Gray: 
+   Heisenbugs: bugs that disappear of change its behavior
+   when you try to examine them.
+   MT programs is a common source of Heisenbugs.
+   
+3. Compilers and architectures reorder instructions
+
+Conclusions: We need structured synchronization to enable
+  sharing between threads.
+  
+  Give up some freedom, and consistently follow some rules,
+  we can reason about MT programs more easily.
+
+1. Structure MT program's state as shared objects;
+   define and limit how state can be accessed.
+2. Shared objects include synchronization primitives
+   (locks and condition variables) to coordinate access
+   to their state by different threads.
+3. Set of best practices for writing code that implements
+   each shared object.
+
+5.1 Challenges
+
+Definition: Race Condition
+Output of a concurrent program depends on the order of operations
+(instructions) between threads.
+
+The threads run a race between their operations, and the results
+of the program execution depends on who wins the race.
+
+Ex.1: 
+Thread 1			Thread 2
+x=1					x=2
+
+Q: What are the possible final values of x?
+A: x=1 or x=2, depending on which thread wins or losses
+   the "race" to set x.
+   
+Ex.2: Initially, y=12 (x need not be set)
+Thread 1			Thread 2
+x=y+1				y=y*2
+
+Q: What are the possible final values of x?
+A: We can get x=13 if T1 executes first,
+   We can get x=25 if T2 executes first.
+
+Thread 1			Thread 2
+LOAD $y, D0			LOAD $y, D1
+ADD #1, D0			MULT #2, D1
+STORE D0, $x		STORE D1, $y
+
+Ex.3: Initially, x=0
+Thread 1			Thread 2
+x=x+1				x=x+2
+
+Q: What are the possible final values of x?
+A: We can obviously get x==3. But we can also
+   get x==2 and x==1. To see why, we need to
+   mentally disassemble to pseudo-assembly code.
+
+Thread 1			Thread 2	
+LOAD $x, D0	        LOAD $x, D0	
+ADD #1, D0	        ADD #2, D0	
+STORE D0, $x        STORE D0, $x
+
+---------------------------------
+Interleaving 1:
+---------------------------------
+Thread 1			Thread 2	
+LOAD $x, D0	        
+ADD #1, D0	        
+STORE D0, $x        
+					LOAD $x, D0	
+                    ADD #2, D0	
+                    STORE D0, $x
+---------------------------------
+
+---------------------------------
+Interleaving 2: Give x==2
+---------------------------------
+Thread 1			Thread 2	
+LOAD $x, D0	        
+					LOAD $x, D0
+ADD #1, D0	        
+					ADD #2, D0
+STORE D0, $x        
+                    STORE D0, $x
+---------------------------------
+
+---------------------------------
+Interleaving 3: Give x==1
+---------------------------------
+Thread 1			Thread 2	
+LOAD $x, D0	        
+					LOAD $x, D0
+ADD #1, D0	        
+					ADD #2, D0
+					STORE D0, $x
+STORE D0, $x        
+---------------------------------
+
+Def. Atomic operations
+Indivisible operations that cannot be interleaved with other
+operations.
+
+- On modern processors load/store of a 32-bit word to/from
+  memory is an atomic operation.
+- Storing a 64-bit word (floating point register) to memory
+  is typically not atomic.
+
+
+Too much milk
+
+Intricacies of locking by memory only!
+
+Model two room mates as threads.
+Number of bottles of milk in the frigde.
+
+Time	Person A						Person B
+12:30	Look in fridge. Out of milk.
+12:35	Leave for store
+12:40	Arrive at store					Look in fridge. Out of milk
+12:45	Buy milk						Leave for store
+12:50	Arrive home, put milk away		Arrive at store
+12:55									Buy milk
+13:00									Arrive home, put milk away (ops!)
+
+Def. Safety: The program never enters a bad state.
+
+Def. Liveness: The program eventually enters a good state.
+(sooner or later, program does something useful)
+
+For the Too much milk example:
+1. Safety: At most one person buys milk
+2. Liveness: If milk is needed, eventually somebody buys milk.
+   (can take a while)
+   
+Attempt 1: Leave a note on fridge
+
+Each thread (room mate) executes:
+
+if milk == 0 {			// if no milk
+	if !note {			// if no note
+		note = true		// leave a note
+		milk++			// buy milk
+		note = false	// remove note
+	}
+}
+
+Problems:
+- First thread execute until check if no milk, and the
+  context switch.
+- The other thread can run through all code 
+  (including buying milk)
+- First thread rescheduled and see that note is false,
+  leave a note, buy milk etc.
+- This code may work fine during testing. But the above
+  problem shows that there is a Heisenbug!
+  Very hard to reproduce.
+
+Attempt 2: Use distinct notes per roommate (two variables)
+
+Person A						Person B
+--------                        --------
+noteA=true                      noteB=true
+if !noteB {              A1     if !noteA {            B1
+	if milk == 0 {       A2      	if milk == 0 {     B2
+		milk++           A3      		milk++         B3
+	}                           	}                  B4
+}                               }                      B5
+noteA=false                     noteB=false
+
+By using two variables (noteA,noteB) have we solved the problem?
+
+We can check the safety property: At most one person buys milk.
+Can also be stated as an invariant: (milk==0 OR milk==1)
+
+Def. Stable Property (variable)
+A property that once it becomes true, remains true forever.
+
+Safety Proof: Proof by contradiction:
+Our assumption is: Algorithm is not safe, and both A and B
+buy milk. Consider the state of the two variables
+(noteB,milk) when thread A is at A1 at the moment when load
+of noteB from memory to A's register occurs. There are
+three cases to consider:
+
+1. Case (true,*): Impossible because this state contradicts
+the assumption that thread A buys milk and reaches A3.
+(Thread A won't be buying milk when noteB=true.)
+
+2. Case (false,milk>0): Impossible because property milk>0
+is a stable property. Thus if milk>0 is true when A is at
+A1, A's test at line A2 will fail, and A will not buy milk,
+contradicting the assumption.
+
+3. Case (false,milk=0): We know that thread B cannot be
+executing lines B1-B5. We also know that either noteA=true
+or milk>0 will be true from this time forward. (noteA OR
+milk>0 is also a stable property). But this means that B
+cannot buy milk in the future (either the test at B1 or B2
+must fail), which contradicts our assumption that both A
+and B buy milk. Q.E.D.
+
+Liveness. Attempt 2 does not ensure liveness. It is
+possible for both threads to set their respective notes,
+for each thread to check the other thread's note, and for
+both threads to decide not to buy milk. (Deadlock)
+
+For solution 3: make sure that at least one of the threads
+determine whether the other thread has bought milk or not
+before deciding whether or not to buy milk.
+
+Attempt 3: Use spinning to wait for B to remote his note.
+
+Person A						Person B
+--------                        --------
+noteA=true                      noteB=true
+while !noteB {                  if !noteA {       
+	;                            	if milk == 0 {
+}                     			 		milk++         
+if milk == 0 {        M     	    }                  
+	milk++                      }                      
+}                               noteB=false
+noteA=false                     
+
+Safety can be shown with a similar argument to solution 2.
+
+Liveness. Observe that Path B has no loops, so eventually
+thread B must finish and set noteB=false, which remains
+false forever (stable property). Therefore, eventually
+thread A must read line M and decide whether to buy milk.
+ - if milk==1, then milk is bought and we are live.
+ - if milk==0, then thread A will buy milk, and we are live.
+
+Discussion:
+Solution to "Too much milk" can be made both live and safe,
+using only atomic load and store operations on shared 
+memory. However, the solution is:
+- Complex: requires careful reasoning to convince oneself that it works
+- Asymmetric: code for thread A and B are slightly different. With more threads even more difficult.
+- Inefficent: thread A is busy-waiting, consuming CPU.
+
+Better solution is to use Lock primitive.
+
+Kitchen::buyMilkIfNeed() {
+	lock.acquire();
+	if (milk==0) {
+		milk++;
+	}
+	lock.release();
+}
+
+In Java:
+Lock lock = new ReentrantLock();
+
+void buyMilkIfNeeded() {
+	lock.lock();
+	try {
+		if (milk==0) {
+			milk++;
+		}
+	} finally {
+		lock.unlock();
+	}
+}
+
+In Go, we might use the defer keyword:
+
+	var lock *sync.Mutex
+	lock = &sync.Mutex{}
+
+func buyMilkIfNeeded() {
+	lock.acquire()
+	defer lock.release()
+	if milk == 0 {
+		milk++
+	}
+}
+
+Ch. 5.2 Shared Objects and Synchronization Variables
+
+Def. Shared Object:
+Object that can safely be accessed by multiple threads.
+
+(OO principles of encapsulation to hide synchronization)
+
+All shared state in a program should be encapsulated in one
+or more shared objects.
+- variables on the heap
+- static and global variables
+
+Shared objects extends OO programming
+- Objects hide their implementation details behind clean
+  interfaces
+- Shared objects hide the details of synchronizing the
+  actions of multiple threads. Threads using shared objects
+  only needs to understand the interface; they don't need to
+  know how synchronization is handled internally.
+
+Synchronization Variables are member variables of Shared Object
+- They are also stored in memory, but are carefully designed for synchronization (locks)
+- they are used to coordinate access to shared variables
+such as ints, strings, arrays,....
+- they simplify implementing shared objects
+- implementing with sync. variables are very similar to implementing data structures for single-threaded programs.
+
+
+Ch 5.3 Lock: Mutual Exclusion
+
+Def. Lock
+A lock is a synchronization variable that provide mutual
+exclusion.
+- when one thread holds the lock, no other thread can 
+  hold the lock (they are excluded).
+
+A lock is associated with a subset of shared state and
+requires a thread to hold the lock when accessing that
+state.
+
+Def. Mutual Exclusion
+Only one thread does a particular thing at a time.
+(particular thing => the critical section)
+
+A thread can perform any operation on shared data protected
+by the lock, and those operations will appear to be atomic
+with respect to other threads.
+
+Def. Critical Section
+A chunk of code that accesses shared state.
+
+A critical section should only be executed by one thread at 
+at time.
+
+How to use a lock:
+- lock before entering critical section
+  (before accessing shared data)
+- unlock when leaving critical section
+  (after we are done accessing shared data)
+- wait if locked
+  (all synchronization involves waiting!)
+
+	lock.lock()
+	// Critical Section starts here
+	if milk == 0 {
+		milk++
+	}
+	// Critical Section end here
+	lock.unlock()
+
+Lock API and Properties:
+- Lock states: Busy and Free
+- Initially Free.
+- Lock::acquire() waits until the lock is Free
+	- Then atomically makes the lock Busy
+	- Atomic CPU instruction, e.g test-and-set.
+- Lock::release() makes the lock Free
+	- If there are pending acquire() operations
+		- One of them will proceed
+
+Formal Properties of Locks
+1. Mutual Exclusion (Safety property). At most one thread 
+   holds the lock.
+
+2. Progress (Liveness property). If no thread holds the
+   lock and any thread attempts to acquire the lock, then
+   eventually some thread succeeds to acquire the lock.
+
+3. Bounded waiting (Liveness and Fairness property).
+   If thread T attempts to acquire the lock, then there
+   exists a bound on the number of times other threads 
+   successfully acquires the lock before T does.
+
+PS: Locks do not order acquire() calls among threads (no FIFO ordering).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
