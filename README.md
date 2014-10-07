@@ -1,3 +1,51 @@
+##Use of inline assembly in gcc
+
+```
+//make a global lock variable
+int asmMutex  = 1;
+ 
+//To lock
+asm("spin: lock btr $0, asmMutex ");
+asm(" jnc spin ");
+.
+//To unlock
+asm(" bts $0, asmMutex ");
+```
+
+##Use of commandline arguments i C
+To get commandline arg into c try this:
+
+``` 
+#include<stdio.h>
+#include<stdlib.h>
+ 
+ 
+int main( int argc, char *argv[] )
+{
+        int i;
+        printf("Number of arguments entered=%d\n", argc);
+        printf("And the arguments are:\n");
+        for(i=0;i<argc;i++)
+                printf("Arg %d=%s\n", i, argv[i] );
+        return 0;
+}
+``` 
+Usage:
+```
+mortenm@pitter23:~/OpSys/2013/cmdline$ ./main 1 heisan hoppsan
+Number of arguments entered=4
+And the arguments are:
+Arg 0=./main
+Arg 1=1
+Arg 2=heisan
+Arg 3=hoppsan
+mortenm@pitter23:~/OpSys/2013/cmdline$
+``` 
+PS: All arguments are 'strings' (char[]), and may need to be converted to in,float, etc. before furter usage.
+Use atoi(), atof() etc....
+
+
+
 ##Share folder between host and guest on VirtualBox
 It is possible to share folders between the host (the machine where the VirtualBox application is running on) and the virtual image.
  
