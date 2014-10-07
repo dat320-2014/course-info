@@ -1,3 +1,15 @@
+##Share folder between host and guest on VirtualBox
+It is possible to share folders between the host (the machine where the VirtualBox application is running on) and the virtual image.
+ 
+You first need to set up a folder on the host (settings->shared folders) and give the share a name. 
+Inside SlackWare you need to run the following command to mount the share:
+ 
+Make a dir where you do the mount:
+mkdir share (or another name you choose )
+sudo mount -t vboxsf share ¨/share (where the first 'share' is the name given in settings->shared folder, and ~/share is the directory just created)
+PS: mount is reserved to 'root' to execute. But by use of sudo we can run 'root' commands as 'user'. Use man sudo for more info
+
+
 ##Lab handin deadlines postponed
 
 Due to the problems with github, we will be postponing the deadline for lab 2 until Sunday 14th, and likewise for the next labs. Please consult the lecture plan for the details. Tomorrow I'll walk through a few examples with git and github to explain a few things. I have also found a new room which should also have better space and facilities. For those who read this, please let others know that we will meet in E458 (across the hall from the eletro-lab).
