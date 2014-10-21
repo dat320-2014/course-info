@@ -1,3 +1,11 @@
+##Lab unavailable on November 18th
+
+FYI: While I expect that both the lab and lectures will be wrapped up by November 18th,
+I just wanted to let you know that another course has requested to use the Linux lab on
+this day between 10-12.
+
+(Posted by Hein: Tuesday 21 Oct)
+
 ##Lab exam info
 
 I've posted a document in this folder titled `lab-exam.md` describing the lab exam procedure.
@@ -6,7 +14,9 @@ I've posted a document in this folder titled `lab-exam.md` describing the lab ex
 
 ##Exams from previous years
 
-I have posted exams and solutions from previous years on It's learning. Note that we used a different book and different lab project in 2012, so it may be somewhat less relevant.
+I have posted exams and solutions from previous years on It's learning.
+Note that we used a different book and different lab project in 2012,
+so it may be somewhat less relevant.
 
 (Posted by Hein: Tuesday 21 Oct)
 
