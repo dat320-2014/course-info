@@ -1,3 +1,9 @@
+##Exams from previous years
+
+I have posted exams and solutions from previous years on It's learning. Note that we used a different book and different lab project in 2012, so it may be somewhat less relevant.
+
+(Posted by Hein: Tuesday 21 Oct)
+
 ##Use of inline assembly in gcc
 
 ```
