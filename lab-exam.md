@@ -2,7 +2,7 @@
 
 We will be organizing lab exams in this course (as was presented at the start of the course). 
 
-The lab exam will be held in Week XX. Exact day and time will be provided in a separate schedule.
+The lab exam will be held in Week 48 (probably). Exact day and time will be provided in a separate schedule.
  
 1. Examination is individual and covers only lab 6 and 7. 
 2. It is meant to be a demo session, where you show that your joint lab is working,
