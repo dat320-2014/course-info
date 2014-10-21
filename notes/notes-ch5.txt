@@ -5,13 +5,14 @@ Only independent threads that operate on completely separate
 subsets of state, i.e. memory, then we can reason about each
 thread separately.
 
-This is as if each thread is a single seqential program.
+This is as if each thread is a single sequential program.
 We don't need to synchronize memory access.
 
-However, most multithreaded (MT) programs consist of cooperating
-threads that read and write to shared state (memory).
+However, most multithreaded (MT) programs consist of
+cooperating threads that read and write to shared state
+(memory).
 
-When we have cooperating threads acccessing shared state,
+When we have cooperating threads accessing shared state,
 programming becomes much more difficult.
 
 The sequential model for reasoning about (cooperating) threads
@@ -26,7 +27,8 @@ breaks down when:
     results)
    a. Scheduler may make different scheduling decisions
    b. Processor may run at (slightly) different frequencies.
-   c. Another concurrent process may affect the cache hit rate.
+   c. Another concurrent process may affect the cache hit 
+      rate.
    d. Running program with a debugger
    e. Recompiling with the -g instead -O options.
 
@@ -54,11 +56,12 @@ Conclusions: We need structured synchronization to enable
 5.1 Challenges
 
 Definition: Race Condition
-Output of a concurrent program depends on the order of operations
-(instructions) between threads.
+Output of a concurrent program depends on the order of
+operations (instructions) between threads.
 
-The threads run a race between their operations, and the results
-of the program execution depends on who wins the race.
+The threads run a race between their operations, and the
+results of the program execution depends on who wins the
+race.
 
 Ex.1: 
 Thread 1			Thread 2
@@ -164,7 +167,8 @@ Def. Liveness: The program eventually enters a good state.
 
 For the Too much milk example:
 1. Safety: At most one person buys milk
-2. Liveness: If milk is needed, eventually somebody buys milk.
+2. Liveness: If milk is needed, eventually somebody buys 
+milk.
    (can take a while)
    
 Attempt 1: Leave a note on fridge
@@ -202,10 +206,12 @@ if !noteB {              A1     if !noteA {            B1
 }                               }                      B5
 noteA=false                     noteB=false
 
-By using two variables (noteA,noteB) have we solved the problem?
+By using two variables (noteA,noteB) have we solved the 
+problem?
 
-We can check the safety property: At most one person buys milk.
-Can also be stated as an invariant: (milk==0 OR milk==1)
+We can check the safety property: At most one person buys
+milk. Can also be stated as an invariant: 
+  (milk==0 OR milk==1)
 
 Def. Stable Property (variable)
 A property that once it becomes true, remains true forever.
@@ -269,8 +275,11 @@ Discussion:
 Solution to "Too much milk" can be made both live and safe,
 using only atomic load and store operations on shared 
 memory. However, the solution is:
-- Complex: requires careful reasoning to convince oneself that it works
-- Asymmetric: code for thread A and B are slightly different. With more threads even more difficult.
+- Complex: requires careful reasoning to convince oneself 
+  that it works
+- Asymmetric: code for thread A and B are slightly 
+  different. 
+  With more threads even more difficult.
 - Inefficent: thread A is busy-waiting, consuming CPU.
 
 Better solution is to use Lock primitive.
@@ -330,12 +339,15 @@ Shared objects extends OO programming
   only needs to understand the interface; they don't need to
   know how synchronization is handled internally.
 
-Synchronization Variables are member variables of Shared Object
-- They are also stored in memory, but are carefully designed for synchronization (locks)
+Synchronization Variables are member variables of Shared 
+Object
+- They are also stored in memory, but are carefully 
+  designed for synchronization (locks)
 - they are used to coordinate access to shared variables
 such as ints, strings, arrays,....
 - they simplify implementing shared objects
-- implementing with sync. variables are very similar to implementing data structures for single-threaded programs.
+- implementing with sync. variables are very similar to 
+  implementing data structures for single-threaded programs.
 
 
 Ch 5.3 Lock: Mutual Exclusion
@@ -403,7 +415,261 @@ Formal Properties of Locks
    exists a bound on the number of times other threads 
    successfully acquires the lock before T does.
 
-PS: Locks do not order acquire() calls among threads (no FIFO ordering).
+PS: Locks do not order acquire() calls among threads (no 
+FIFO ordering).
+
+
+---------------------- AFTER BREAK ------------------------
+
+Ch. 5.4 Condition Variables: Waiting for a change
+
+To wait for another thread for some change:
+Poll - repeatly check the state of interest
+
+F.ex. TSQueue could wrap tryRemove() in a polling loop
+to provide a remove() method that always returns an item.
+
+func (q *TSQueue) remove() (item int) {
+  success := false
+  for !success {
+  	success = q.tryRemove(&item)
+	if !success {
+		sleep(100ms)
+	}
+  }
+  return
+}
+
+This approach is inefficient!
+- continuously loops, consuming CPU cycles
+- worse: it may delay scheduling of other threads
+
+Fix: We could add a sleep inside the loop to avoid wasting 
+CPU cycles?
+- Waiting 100ms after each failed attempt to remove an item
+
+Two problems:
+- Even though we reduce the the inefficiency of polling
+  it does not eliminate it.
+  Suspending and resuming a thread imposes overheads
+- Periodic polling adds latency (e.g. 100ms delay waiting
+  for the next key press, or if it is a packet processing
+  loop, 100ms may be too long)
+
+Def. Condition Variable (CV)
+A condition variable (betingelsevariable) is a
+synchronization object that enables a thread to efficiently
+wait for a change to shared state that is protected by a
+lock. Essentially: wait for another thread to take some
+action.
+
+In the TSQueue example:
+Instead of return an error when trying to remove an item
+from an empty queue, we may instead wait until the queue is
+non-empty and always return an item. (Making it BLOCKING)
+
+API of CV:
+- wait():
+  atomically release lock and relinquish CPU until signaled
+- signal():
+  wake up a waiter, if any
+- broadcast():
+  wake up all waiters, if any
+
+To use CV: Always hold lock when calling wait(), signal() 
+and broadcast().
+- CV is used to synchronize on shared state
+
+Wait call must be in a loop:
+
+lock.acquire()
+while !conditionOnSharedState() {
+	condition.wait(&lock)
+}
+// read and write to the shared state (critical section)
+lock.release()
+
+1. CV is memoryless
+- if signaled when no thread is waiting, no op
+- if wait before signal, waiter wakes up
+
+2. Wait() atomically releases lock
+- put thread on CV's waiting queue
+- when wait() returns, must re-check condition
+  (lock was released by wait(), and another thread may
+   have changed the condition.)
+
+3. When a thread is woken up from wait, it may not run
+   immediately
+- Signal/broadcast put thread on ready list
+- When lock is released, anyone can acquire the lock
+
+Method that signals:
+
+methodThatSignals() {
+  lock.acquire()
+  // update the state that could allow other threads
+  // to make progress
+  cv.signal()
+  lock.release()
+}
+
+Example: Blocking Bounded Queue
+See Code example bbq.go
+
+----
+
+Def. Semaphore
+A semaphore is a variable that may be used for controlling
+access to a common resource by multiple threads
+- Counting semaphore: resource count
+
+--- Skip Ch. 5.5 (read on your own if interested)
+
+Ch. 5.6 Design and implementing shared objects
+
+Designing the class for a shared object similar to designing a single-threaded object.
+
+1. Decompose the problem into objects
+2. For each object
+   a. Define a clean interface
+   b. State: Identify the right internal state and 
+      invariants (to support that interface)
+   c. Algorithms: Implement methods with appropriate 
+      algorithms that manipulate the state
+
+Additionally for multi-threaded programs:
+
+- Add a lock
+  - only one lock per shared object
+
+- Add code to acquire and release the lock
+  - Reminder: Acquiring an uncontended lock is inexpensive
+  - So don't avoid using locks for the wrong reasons
+
+- Identify and add condition variables
+  - Systematic approach:
+    - For each method ask: "When can this method wait?"
+	- Then map each situation (in which the method can wait)
+	  to a condition variable
+	  ex. itemRemoved, itemAdded
+
+- Add loops to wait() using the condition variable
+  - Can be difficult to define details of the condition test
+    - Write private method first, e.g. workAvailable()
+	- Then define private method later
+
+while (!workAvailable()) {
+	cond.wait(&lock)
+}
+// here the condition is true and we have the lock
+
+- Add signal() and broadcast() calls
+  - When can a method let other waiting threads proceed?
+    - Ask: "Can a call to this method allow 
+	        another thread to proceed?"
+	- Add signal() or broadcast() if yes.
+  - Use signal() when
+    - when at most one waiting thread can make progress
+	- any thread waiting on the CV can make progress
+  - Use broadcast() when
+    - multiple waiting threads may be able to make progress,
+	- or different threads are using the same CV to wait for
+	  different predicates (test conditions), so some of the
+	  waiting threads can make progress but others cannot.
+  - Always safe to use broadcast()
+    - Consumes additional resources
+	- But will not introduce bugs
+
+----
+Implementing best practices:
+Writing simple, safe code with shared objects
+
+Consistent structure
+Meta-rule: Always follow a consistent structure 
+(used established design patterns for shared objects)
+
+(a) Frees you to focus on the core problem because details 
+    of the standard approach become a habit
+(b) Makes it easier for other people to review, maintain, or
+    debug your code.
+	
+Five simple rules (best practices):
+1. Always synchronize with locks and condition variables
+(learn about semaphores to understand legacy code, but only
+write new code with locks and CVs.)
+
+2. Always acquire the lock at the beginning of a method
+   and release it right before the return.
+   (Keep consistent structure. If you find that a method 
+    modifies shared state in a smaller part of the method, 
+	then refactor it into a separate method that follows 
+	Rule #2.)
+
+3. Always hold the lock when operating on a condition 
+   variable.
+   
+4. Always wait in a while/for loop
+   while predicateOnStateVariables() {
+     cond.Wait(&lock)
+   }
+
+5. (Almost) never sleep().
+   Never use sleep() to have one thread wait for another 
+   thread to do something. Correct way to wait for a 
+   condition to become true is to wait() on a condition 
+   variable.
+
+Java pitfalls:
+1. Avoid defining a synchronized block in the middle of a
+   method.
+2. Keep shared state classes (shared objects) separate from
+   thread classes. State that can be accessed by multiple
+   threads, locks, and condition variables should never
+   appear in any Java class that extends Thread or 
+   implements Runnable. Define SharedObject class as 
+   separate from the Runnable thread class.
+
+Example: Readers/Writers
+- Database with records that can be read and written
+- Want to maximize performace:
+  - Multiple threads can read a record simultaneously
+    (this is safe!)
+  - For correctness: If one thread is writing a record, no
+    other thread can read or write that record at the same
+	time.
+
+Need to generalize our mutex lock into readers-writers lock 
+(RWLock)
+
+To read a record, a thread should do:
+
+	rwLock.startRead();
+	// read database entry
+	rwLock.doneRead();
+
+To write a record, a thread should do:
+
+	rwLock.startWrite();
+	// write database entry
+	rwLock.doneWrite();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,0 +1,415 @@
+Ch. 6 Advanced Synchronization
+
+Many programs have multiple shared objects (SO).
+We need to reason about the interactions among these SO.
+
+Issue: In some cases when a module calls another, you must
+know the internals of the other module to ensure that their
+synchronization mesh up. This breaks the modularity of SO.
+
+1. Safety: Multi-object synchronization. For programs with 
+   multiple SOs, even though each operation on the SOs is 
+   atomic, we need to reason about interactions of 
+   operations across SOs.
+
+2. Liveness: Deadlock. One way to reason about sequences of 
+   operations on multiple SOs is to hold multiple locks. 
+   Issue: deadlock can occur when a set of threads get 
+   permanently stuck waiting for each other in a cycle.
+
+3. Synchronization with reduced locking: Two techniques for 
+   synchronzing access to shared state without locking: 
+   read-copy-update (RCU) and lock-free/wait-free data 
+   structures.
+
+Ch. 6.2 Multi-object synchronization
+
+Example: system storing bank accounts
+A reasonable design choice:
+- Each customer's account is a SO object with a Lock 
+  (or RWLock)
+
+Case 1: Transfer $100 from account A to account B:
+
+Thread of User A					Thread of User B
+A.withdraw($100)
+									bal = B.balance()
+B.deposit($100)
+									assert(bal==$100)
+
+Both withdraw() and deposit() are individually atomic, but 
+sequences of actions is not.
+
+A tells B it has sent money, but B didn't receive it yet.
+Don't want User B to see this inconsistency, even if it is
+fixed at a later time.
+
+Case 2: Bank manager runs a program to answer: "How much
+money does the bank have?" If the program just reads from
+each account, the calculation may exclude or double-count
+money in-flight between accounts such as in the transfer
+from A to B.
+
+One big lock vs fine-grained locking
+
+Simple solution:
+Include all of a program's data structures in a single SO with a single lock.
+(Can be ok, if careful to avoid holding lock during high-latency IO operations, or in general holding it for a long time.)
+
+For some other applications, a single global lock may restrict parallelism too much:
+
+1. Then different data structures may each have their own lock, or even
+
+2. Partitioning an object's state into different subsets protected by different locks. (this is called fine-grained locking.)
+
+
+To implement Case 1:
+Transaction involves two account objects:
+
+var bigLock sync.Mutex
+
+func transfer(a, b Account, amount double) {
+  bigLock.Lock()
+  defer bigLock.Unlock()
+  a.withdraw(amount)
+  b.deposit(amount)
+}
+
+To implement Case 2:
+
+var accounts []Accounts
+
+func totalBankBalance() (total int64) {
+  bigLock.Lock()
+  defer bigLock.Unlock()
+  for i, a := range accounts {
+	  total += a.balance()
+  }
+  return
+}
+
+---
+
+Example Hash table with fine-grained locking
+
+get(), put(), remove(), resize()
+
+A traditional solution would be to use single coarse-grained
+lock for all methods that operate on the hash table.
+
+If this limits performance, a fine-grained approach is to
+have one lock per hash bucket and acquire the lock for the
+bucket b before accessing any record that hashes to bucket b
+
+No fundamental difference between
+- multiple SOs, each with its own lock,
+- a SO that uses fine-grained locking with multiple locks
+  covering different subsets of its data structure.
+
+Complexity vs performance
+-> Beware of permature optimization
+Organizing a SO into different subsets protected by different locks
+- Will increase complexity
+- May not always improve the performance as much as hoped
+  (it depends on the workload that the system is exposed to)
+  
+Example: Resizable hash table
+
+Want implement a hash table whose number of buckets grows
+as the number of objects it stores increases.
+- With a single lock - this is easy.
+- Fine-grained locking per bucket - more complex.
+
+Complex because:
+- some operations: put() and get() operate one bucket/lock
+- other operations: resize() may operate across all
+  buckets/locks
+
+Solution 1:
+get()/put(): First get read lock on whole hash table   
+  because get()/put() for different buckets can operate  
+  concurrently.
+	table.RWLock.readMode()
+	PerBucketLock.Lock()/Unlock()
+resize():
+	table.RWLock.writeMode()
+
+Solution 2:
+get()/put():
+	PerBucketLock.Lock()/Unlock()
+resize():
+	for bucket := range buckets {
+		bucket.lock()
+		// resize
+		bucket.unlock()
+	}
+
+Solution 3:
+Divide hash space into r regions
+- PerRegionLock
+- Resize each region independently when region becomes 
+  heavily loaded.
+- put(), get(), resizeRegion() all need to get PerRegionLock
+
+Which solution is best?
+- Solution 1: Simple. Appears to have good concurrency. But
+  aquiring the RWLock even in read mode often involves
+  writing a cache line that will be shared by many 
+  processors, so it may have poor performance.
+- Solution 2: resize() is expensive, but if resize() is 
+  rare, then it may be ok.
+- Solution 3: Balances the cost of get()/put() against the
+  cost of resize(), but is much more complex and may require
+  tuning the number of regions to get good performance.
+
+------
+
+Solutions and design patterns that work well in practice
+(for multi-object, multi-lock programs)
+
+- Careful class design
+	- Clean interfaces that expose the right abstractions
+
+- Ownership pattern (common pattern in Go programs)
+	- Thread removes an object from a container (e.g. queue)
+	- May access the object without holding a lock
+	- Program structure guarantees that at most one thread
+	  owns the object at a time.
+	- Work Queue: (see figure from whiteboard)
+	  Receive object from the Network, Parse objects,
+	  Render objects.
+
+- Acquire-All/Release-All pattern
+	- A thread must acquire all locks that will be needed
+	  during processing
+	- When processing is done, release all locks
+	- Can get significant concurrency:
+		- if requests touch non-overlapping subsets of state
+		  protected by different locks, then they can
+		  proceed in parallel
+	- Enforces "serializability" across requests
+		- The result of any execution of the program is
+		  equivalent to an execution in which requests
+		  are processed one at a time in some sequential 
+		  order.
+	- If two rqeuests touch any of the same data, then one
+	  will be processed entirely before the other's
+	  processing begins.
+	- Problems:
+	  1. Knowing what locks will be needed before beginning
+	     to process a request: For example, if there are
+		 conditional statements that can result in varying
+		 number of locks needed.
+	  2. Locks may be held longer than needed.
+
+	  Both of these problems lead to reduced concurrency.
+
+- Two-phase locking
+	- Refines the AA/RA pattern to address the above 
+	  two issues
+	- Divide multi-step task into two phases
+	- Expanding phase: Locks may be acquired 
+	  but not released
+	- Contraction phase: Locks may be released
+	  but not acquired
+	- For some programs: more concurrency than AA/AR pattern
+		- No a priori lock grabbing
+		- Can avoid acquiring locks that we don't need
+		- Can hold some locks for a shorter time
+
+- Staged Architecture Pattern
+	- Divide system into multiple subsystems: stages
+	- Each stage has
+		- Private state (belonging to that stage)
+		- A set of worker threads that operate on that state
+	- Stages communicate by sending messages via shared
+	  producer-consumer queues
+		- Pull next msg from stage's incoming queue
+		- Produce one or more msgs for other stages' queues
+    - Example:
+		- Connect stage: one thread to set up network
+		  connection to client
+		- Read and Parse stage: several threads
+			- Gets a connection from incoming queue
+			- Read request from connection
+			- Parse request
+			- Determine what web page is being requested
+		- Read Static Page stage: 
+			- One of the stage's threads reads static page
+			  from disk
+		- Generate Dynamic Page stage:
+			- One of stage's threads runs a program to 
+			  dynamically generate a page in response to
+			  the request
+			- Page and connection passed to
+			  the Send Page stage
+		- Send Page: Once page fetched or generated
+			- One thread transmits the page over
+			  the connection.
+	- Key property of staged architecture:
+		- private state and msg-based interface
+		- improves modularity: easier to reason about
+			- each stage individually
+			- interactions between the stages
+		- Enable development in parallel by different teams
+	- Benefit: Improved cache locality
+		- Thread on a procesor is operating on a subset of
+		  the system's state
+		  	- may have better cache hit rate
+			- than a thread that must access state from all
+			  stages
+	- Drawback: For some workloads: passing requests from
+	  stage to stage will hurt cache hit rate.
+	  (lots of data copying between stages)
+	- For good performance: processing in each stage must
+	  be large enough to amortize the cost of sending and
+	  receiving msgs.
+	- Challenge is to deal with overload:
+		- Throughput limited by slowest stage
+		- If system overloaded, slowest stage will fall 
+		  behind and the queue before it will grow
+		- Two bad things can happen:
+		  1. Queue grows indefinitely: run out of memory
+		  2. Queue size limited: once limit reached, earlier
+		     stages must either:
+			 	- discard msgs or
+				- block until queue has room
+				- (if blocking: backpressure will limit
+				   earlier stage's throughput to that of
+				   the bottleneck stage and their queue
+				   will begin to grow too.)
+		- Solution: Dynamically vary the number threads per
+		  stage. If a stage's incoming queue is growing,
+		  shift processing resources to it.
+	
+Ch. 6.2 Deadlock
+
+Challenge when constructing programs with multiple SOs:
+Deadlock.
+
+Def. Deadlock
+A deadlock is a cycle of threads, where each thread is
+waiting for some other thread in the cycle to take some
+action.
+
+Deadlock vs Starvation: Both liveness concerns; can we make
+progress?
+
+Starvation: Some thread fails to make progress for an
+indefinite period of time.
+
+Deadlock: A form of starvation, but a stronger condition: a
+group of threads form a cycle where none of the threads
+make progress.
+
+Deadlock implies starvation, but starvation does not imply 
+deadlock.
+
+Other hard (liveness) problems:
+- priority inversion
+- denial of service
+
+These problems are hard because, whereas we were able to 
+structure programs so that safety became a local property
+(modularity), these liveness issues have to do with global
+structure of a program (e.g. no modularity).
+
+The good news is that these problems are usually not as 
+dangerous as safety bugs. As opposed to intermitted bugs:
+	"The program stops with the evidence intact."
+										[Lampson]
+
+(usually not so bad; but occasionally catastrophic: 
+  Mars Pathfinder.)
+
+When can deadlock occur?
+
+Mutually recursive locking
+
+- Two threads T1 and T2 can deadlock if:
+  - T1 calls S1.m1a(), which tries to call S2.m2b() while
+  - T2 calls S2.m2a(), which tries to call S1.m1b()
+  - And this happens such that T1 and T2 must wait on the
+    lock in m2b() and m1b()
+  - We have circular waiting!
+  
+Example: The Dining Philosophers
+(classical synchronziation problem that illustrates the
+challenge of deadlock.)
+
+Philosophers eating at a really cheap Chinese resturant,
+with not enough chopsticks to go around. Alternate between
+eating and thinking.
+
+Resources: Round table with N plates, and N chopsticks
+Requirement: A philosopher sitting at each plate requires
+ two chopsticks to eat.
+Algorithm:
+- Each philosopher grab the chopstick on the left
+- Grab the chopstick on the right
+- Eat
+- Replace the chopsticks
+
+Deadlock: Each philosopher grab left chopstick, but get
+stuck waiting for the philosopher to the right to replace
+the chopstick she holds. This can go around the table.
+
+Example: Shared resource pool
+Threads: 5 philosophers
+Resources: 5 chopsticks 
+           (on a tray at the center of the table)
+Condition 1: Bounded resource
+Condition 2: No preemption; 
+             cannot remove chopstick from a philosopher.
+
+Diagram shows:
+- P0 is eating
+- P1, P2, and P3 all waiting for one more chopstick, while
+  it holds one resource (Condition 3)
+- We have circular waiting (each thread is waiting for a resource held by another) (Condition 4).
+
+But we don't have a deadlock in this case:
+- P0 will eventually release its two chopsticks
+- P1 and P2 may get each one of these two released 
+  chopsticks and eat,
+- When P1 and P2 releases: P3 and P4 may get the chopsticks 
+  and eat.
+
+System is still subject to deadlock.
+- If P0 returns two chopsticks
+- P4 grabs one and P0 immediately grabs the other one
+- Then we have a deadlock!
+
+Necessary conditions for deadlock:
+
+1. Limited access to resources
+   (infinite amount resources: no deadlock)
+2. No preemption
+   (If some has a resource, system can't take it back)
+3. Waiting while holding (multiple independent requests)
+   A thread holds a resource while waiting for another
+4. Circular waiting
+   There is a set of waiting threads such that each thread
+   is waiting for a resource held by another
+
+Solutions to deadlock:
+- Detect and fix
+- Avoid
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
