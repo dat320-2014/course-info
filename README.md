@@ -1,3 +1,9 @@
+##Lecture also in Week 46
+
+Due to my travels and illness earlier this semester, I will be lecturing also in Week 46.
+
+(Posted by Hein: Sunday 26 Oct)
+
 ##Lab unavailable on November 18th
 
 FYI: While I expect that both the lab and lectures will be wrapped up by November 18th,
