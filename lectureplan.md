@@ -37,14 +37,14 @@
 |  44  | 27/10 |   8   | Address Translation                                             |   Hein  |              |
 |      | 28/10 |   8   | Address Translation                                             |   Hein  |              |
 |      | 28/10 | Lab 6 | Linux Kernel IO Driver                                          |  Morten |              |
-|      |  2/11 |       | **[Lab 6 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab6)** |       |       |
+|      |  4/11 |       | **[Lab 6 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab6)** |       |       |
 |  45  |  3/11 |   9   | Caching and Virtual Memory                                      |   Hein  |              |
 |      |  4/11 |   9   | Caching and Virtual Memory                                      |   Hein  |              |
 |      |  4/11 | Lab 7 | ZapLab: TV channel statistics                                 |   Hein  |              |
 |  46  | 10/11 |   9   | Caching and Virtual Memory (catch up lecture)                   |   Hein  |              |
 |      | 11/11 |   9   | Caching and Virtual Memory (catch up lecture)                   |   Hein  |              |
 |      | 11/11 | Lab 7 | ZapLab: TV channel statistics                                 |   Hein  |              |
-|      | 16/11 |       | **[Lab 7 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab7)** |         |              |
+|      | 18/11 |       | **[Lab 7 Handin](https://github.com/uis-dat320-fall2014/labs/tree/master/lab7)** |         |              |
 |  47  | 21/11 |       | Lab Handin (w/5 slip days)                                      |         |              |
 |  48  | 24/11 |       | Final Handin Date (w/reduced grade)                             |         |              |
 |  50  | 13/12 |       | **Exam**                                                        |         |              |
