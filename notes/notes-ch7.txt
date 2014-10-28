@@ -1,0 +1,450 @@
+Ch. 7 Scheduling
+
+Decide how to allocate a single resource (or a set of
+resources) among multiple clients.
+- In what order and for how long.
+
+Our resources will typically be a CPU.
+But OS also schedules other resources, e.g. disk and 
+network IO.
+
+- Scheduling policy: what to do next, when there are:
+	- multiple threads ready to run
+	- multiple packets to send
+	- web requests to serve, and so on...
+
+Performance Terminology:
+- Task/Job (basic unit to be scheduled):
+	- A user request: e.g. web request, mouse click, 	  
+	  compute job, ...
+	- Can be of any size (in terms of CPU running time)
+	- We use the term Task instead of Thread, since a single
+	  thread can be responsible for multiple Tasks 
+	  (or users requests)
+
+Metrics to be optimized:
+- Response time/Latency:
+	- How long does a task take to complete?
+	- The user-preceived time to do some task.
+- Predictability:
+	- How consistent is the performance over time?
+	- Low variance in response times for repeated tasks.
+- Throughput:
+	- How many tasks can be completed per unit of time?
+	- The rate at which tasks are completed.
+
+- Scheduling overload 
+	- How much extra work is done by the scheduler?
+		- Time to compute the next task to run.
+		- Scheduling algorithm needs the CPU to run.
+	- Any time spent in scheduler is "wasted" time.
+		- Want to minimize overhead of decisions and
+		  maximize utilization of the CPU
+		- But low overhead is no good if your "fast"
+		  scheduler picks the "wrong" things to run!
+	- Trade-off between:
+		- schduler complexity/overhead and
+		- optimiality of the resulting schedule 
+		  that it provides
+	- Challenge: Frequency of scheduling decisions:
+		- Increased scheduling frequency:
+			- increased chance of running something else
+			- leads to higher context switching rates
+				- results in lower thput.
+
+- Switching overhead
+	- The time to switch from one task to another
+
+- Fairness
+	- How equal is the performance received by different 
+	  users?
+	- Equality in the number and timeliness of resources
+	  given to each task.
+
+- Starvation
+	- Lack of progress for one task, due to resources given
+	  to higher priority tasks.
+
+We want to:
+
+1. Minimize response time: elapsed time to complete a task
+
+2. Maximize throughput: tasks completed per second
+
+	a) Minimize overhead (context switching, scheduling)
+	b) Efficient use of system resources (not only CPU,
+	   but also disk, memory etc.)
+
+3. Fair: share CPU among users/threads/processes in some  
+   equitable way
+
+Tradeoff: we can argue that we can get better average 
+response time by maing the system less fair.
+
+More Terminology:
+
+- Workload: input to the scheduling algorithm
+	- Set of tasks for system to perform:
+		T = {(a1,d1), (a2,d2), ..., (aN,dN)}
+	- aX = arrival time of task X
+	- dX = duration until task X completes 
+
+- Preemptive scheduler
+	- Scheduler can take resources away from a running task
+
+- CPU-bound tasks
+	- primarily using/waiting for CPU
+
+- IO-bound tasks
+	- primarily using/waiting for I/O
+
+- Work-conserving policy:
+	- Resource is used whenever there is a task to run
+	- CPU never idle if there is work to do
+
+Scheduling algorithm:
+Input: some workload (set of tasks to run): W
+Output: next task to run (or an ordering of all tasks)
+
+Ch. 7.1 Uniprocessor scheduling
+
+First-In First-Out (FIFO)
+- Schedule tasks in the order they arrive
+- Run task until complete
+
+Pros:
+- Minimize overhead; switches only when task is complete
+- With fixed # of tasks; best throughput possible
+  (it will complete the most tasks most quickly)
+- Appears to be the definition of fairness
+
+Cons:
+- Short task arriving behind a very long task; system will
+  appear very inefficient
+- Poor average response time
+
+Example FIFO:
+5 tasks arrive almost at the same time, but task 1 arrives
+just a little bit before the others.
+Lenght of task 1 is 1s, while tasks 2-5 is 1ms each.
+
+(See notes from whiteboard with FIFO drawing)
+
+PS: FIFO is still useful for some workloads
+
+
+Shortest Job First (SJF)
+- Always do the task that has the shortest remaining amount 
+  of work to do.
+
+Example (See whiteboard notes)
+
+Pro:
+- This is an optimal policy wrt. average response time
+
+Cons:
+- Starvation of long jobs if we have lots of short jobs.
+- Impossible to implement:
+	- must know how much time each task needs the CPU
+	  (predict the future)
+	- meant as the optimal base line for comparing
+	  scheduling algorithms
+
+Round Robin Scheduling Algorithm
+
+Can we combine the best of both worlds?
+- Optimal like SJF, but without starvation.
+
+- Each task gets resources for a fixed period of time 
+  (time quantum)
+- If the task doesn't complete, it goes back in line
+
+Challenge:
+- Need to pick a suitable time quantime (q)
+	- What if q is too long? e.g. infinite?
+	- What if q is too short? e.g. just one instruction?
+
+Example Round Robin
+Two quantum: q=1ms and q=100ms
+
+(See whiteboard notes)
+
+Round Robin vs FIFO
+
+Assuming zero-cost switching time, is RR always better than FIFO?
+
+Tasks arrive almost at the same time again, and tasks are of equal length.
+
+W={(0,20), (0,20), (0,20), (0,20), (0,20)} 
+
+(see whiteboard notes)
+
+Everything is fair with RR, but avg. resp. time in this
+case is awful - everyone finishes late. 
+In fact, this case is exactly when FIFO is optimal, RR is 
+poor.
+
+- With FIFO no task is worse off than with RR.
+- All tasks finish before they do in RR,
+  expect the last one which finishes at the same time.
+- RR: Adds context switch overhead without any benefit.
+
+On the other hand: if we're running streaming video, RR is
+great - everything happens in turn.
+
+SJF (FIFO) maximizes variance.
+But RR minimizes the variance.
+
+Is RR always fair?
+
+Example: Mixed workload
+- One task is I/O-bound
+	- Loop: 1ms compute part, 10ms disk access
+- Two tasks are CPU-bound
+	- Compute continuously
+
+With RR q=100ms:
+
+W={t1:(0,1),   t2:(1,100),   t3:(101,100), 
+   t1:(201,1), t2:(202,100), t3:(302,100), ...}
+   	
+I/O task has to wait its turn for the CPU, and the
+result is that it gets a tiny fraction of the performance
+it could get.
+- The I/O completes early and have to wait for a long time
+to start a new I/O operation.
+- The compute-bound tasks are ok.
+
+We could shorten the RR quantum, and that would help, but it
+would increase overhead.
+
+What would this do under SJF?
+
+Every time the I/O task returns to the CPU, it would get
+scheduled immediately.
+And the long running CPU bound tasks would get back the CPU
+quickly, so their performance would only see a slight 
+degradation.
+
+Def. Max-Min Fairness iteratively maximizes the minimum
+allocation given to a particular process (user,
+application, or thread) until all resources are assigned.
+
+For compute-bound processes, max-min behavior: maxmimize
+the minimum by giving each process the same share of the
+CPU: same as RR.
+
+More interesting with processes that cannot get their
+entire share, because they are I/O-bound or short-running.
+
+Approximation: every time scheduler runs, choose the task
+with th least accumulated time on the processor (our case: 
+I/O-bound task).
+
+* Multi-level Feedback Queue (MFQ)
+
+Variations of MFQ is used by Linux, Windows, MacOSX etc.
+
+Goals of MFQ:
+- Responsiveness:
+	- Run short tasks quickly (simulate SJF)
+- Low overhead:
+	- Minimize preemptions, as in FIFO
+	- Minimize time spent making scheduling decisions
+- Starvation freedom:
+	- All tasks should make progress, as in RR
+- Background tasks:
+	- Some tasks are high/low priority
+	- Defer system maintainance tasks such as disk defrag.
+	- They should not interfer with user tasks
+- Fairness
+	- Assign processes approx. their max-min fair share of 
+	  the CPU
+	- Among equal priority tasks.
+
+Have a set of Round Robin queues
+- Each queue has a separate priority
+- High priority queues have short time slices
+- Lower priority queues have long time slices
+
+The scheduler picks first task in highest priority queue
+- Tasks start in highest pri. queue
+
+- (CPU-bound tasks): If time slice expires, task drops one
+  level
+  	- (it's a long running task, and will be scheduled
+	   with longer time slice, but less often)
+	- Minimizes switching overhead
+
+- (IO-bound tasks): If yield CPU before time slice expires,
+  stay at the same level (or bump up one level).
+
+To acheive starvation-freedom and max-min fairness:
+- Monitor processes, ensure it is receiving its fair share
+  of the resources
+- Periodically, any porcess receiving
+	- less time than its fair share, increase its priority
+	- more time than its fair share, decrease its priority
+
+Ch. 7.2 Multiprocessor scheduling
+
+Scheduling Sequential Application on Multiprocessors
+
+What would happen if we used MFQ on a multiprocessor?
+- Contention for scheduler spinlock
+	- Centralized lock becomes a bottleneck
+	- When number proc. increases
+- Cache effects
+	- Cache coherence overhead
+		- Each proc. must fetch current MFQ state from cache
+		  of previous processor
+		  	- Causes cache copying and invalidations
+			- More costly than refetching from DRAM
+	- Cache reuse
+		- If a thread is assigned to first available proc.
+		- Likely a different proc. than the last time it ran
+		- Code/data not in the cache of that processor
+
+Solution: 
+Use Per-Processor MFQ data structure: Affinity scheduling
+- thread sticks with the same processor every time it is
+  rescheduled
+- maximizes cache reuse!
+- *threads can migrate between processors, but only when   
+  queues are long and the time to reload caches is less 
+  than waiting time for queues to reduce.
+
+Scheduling Parallel Applications
+
+Decomposition of parallel application
+- dividing work into equal sized chunks,
+- each of which can run on a processor in parallel
+- #chunks = #proc.
+- (may need to communiate or synchronize 
+   after computing chunks to start next batch of chunks)
+
+If we have more than one application running at the same 
+time (we most often do)
+- then those applications can disrupt mapping of parallel  
+  tasks onto a fixed set of processors.
+
+Oblivious Scheduling
+- OS scheduler is unaware of intent of parallel application.
+
+- Each processor time-slices its ready list independently 
+of the other processors.
+
+(see whiteboard notes)
+
+Problems:
+- Equal size chunks computed in parallel, when done wait for
+  all threads before continue computation (Thread.join())
+	- Wait is needed for synchronizing/communication between
+	  threads
+	- Can lead to bulk synch. delay
+	- If other applications get to use some processors,
+		- causes varying delays for our parallel program
+
+Amdahl's Law:
+- Speedup of a parallel program by adding more processors
+	- Limited by whatever runs sequentially
+		- Critical path delay (sequential porition)
+	- Runtime >= seqential porition+parallel portion/#CPUs
+
+Speedup=exec.time w/out enhancement/exec.time w/enhancement
+
+Example:
+- Suppose scheduler lock used 0.1% of the time
+  (must be accessed sequentially)
+- Suppose that this causes a slowdown of 50x 
+  because of cache effects
+- So sequental porition: 5% of CPU time
+
+Runtime(1 CPU)= 0.05 + 0.95/1 = 1.0
+Runtime(10 CPUs)= 0.05 + 0.95/10 = 0.145
+Runtime(100 CPUs)= 0.05 + 0.95/100 = 0.0595
+Speedup=RT(1)/RT(10)=1/0.145=6.9x speedup
+Speedup=RT(10)/RT(100)=0.145/0.0595=2.4x speedup
+
+Some parallel applications can scale (close to) linearly
+with the number processors.
+Others experienece diminish returns
+Limited parallelism: some applications may actually 
+experience degraded performance as we increase # processors.
+Why can this happen?
+- If the threads on different processors needs to
+  synchronize a lot, then it can hurt performance more than
+  it gains (more processors are involved in the
+  synchronization.)
+
+Co-scheduling
+
+Schedule all tasks of an application together
+- Application picks decomposition of work into threads
+- Threads run together or not at all
+
+Useful for single use servers, e.g. database server
+Co-scheduling can be inefficient for multiplexing multiple
+parallel applications.
+
+Space sharing
+
+Allocates a process onto a subset of the processors
+
+(see whiteboard)
+
+Minimizes context switches
+
+Ch. 7.3, 7.4, and 7.5: Read on your own.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

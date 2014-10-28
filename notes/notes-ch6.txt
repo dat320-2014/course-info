@@ -18,7 +18,7 @@ synchronization mesh up. This breaks the modularity of SO.
    permanently stuck waiting for each other in a cycle.
 
 3. Synchronization with reduced locking: Two techniques for 
-   synchronzing access to shared state without locking: 
+   synchronizing access to shared state without locking: 
    read-copy-update (RCU) and lock-free/wait-free data 
    structures.
 
@@ -253,7 +253,7 @@ Solutions and design patterns that work well in practice
 			- interactions between the stages
 		- Enable development in parallel by different teams
 	- Benefit: Improved cache locality
-		- Thread on a procesor is operating on a subset of
+		- Thread on a processor is operating on a subset of
 		  the system's state
 		  	- may have better cache hit rate
 			- than a thread that must access state from all
@@ -274,7 +274,7 @@ Solutions and design patterns that work well in practice
 		     stages must either:
 			 	- discard msgs or
 				- block until queue has room
-				- (if blocking: backpressure will limit
+				- (if blocking: back-pressure will limit
 				   earlier stage's throughput to that of
 				   the bottleneck stage and their queue
 				   will begin to grow too.)
@@ -334,10 +334,10 @@ Mutually recursive locking
   - We have circular waiting!
   
 Example: The Dining Philosophers
-(classical synchronziation problem that illustrates the
+(classical synchronization problem that illustrates the
 challenge of deadlock.)
 
-Philosophers eating at a really cheap Chinese resturant,
+Philosophers eating at a really cheap Chinese restaurant,
 with not enough chopsticks to go around. Alternate between
 eating and thinking.
 
@@ -395,6 +395,256 @@ Necessary conditions for deadlock:
 Solutions to deadlock:
 - Detect and fix
 - Avoid
+
+Detect deadlock and fix:
+- Build a Wait-For-Graph (WFG) 
+  (also called resource allocation graph)
+- Scan the WFG 
+- Detect cycles in the graph
+- Break them up (this is the hard part)
+  - it violates Condition #2; no preemption
+
+No cycles: No deadlock exists
+If there are cycles: Deadlock may exist
+
+Ways to fix deadlock:
+
+Once you're in a deadlock situation; need to revoke
+some resources to fix it.
+
+1) Killing a process that is part of a deadlock does not
+   leave the system worse off.
+   (unless only an unimportant part of the process is 
+   involved in the deadlock.)
+
+2) Kill thread; force it to give up its resources:
+   This isn't always possible without causing harm.
+   For example, with a mutex, we can't shoot a thread,
+   free its resources and still expect the system to be
+   in a consistent state.
+
+3) Transactions:
+   1) Undo a deadlocked threads' actions
+      (roll back a thread in the deadlock circle;
+	   victim thread)
+   2) Let other threads proceed
+   3) When other threads complete their work; restart the
+      victim thread
+
+Transactions: Costly.
+
+Key differences between transactions and critical sections:
+- transactions can abort and roll back their actions
+- must maintain an undo log that keeps track of the initial
+  values of all state modified by the transaction
+- deadlocked transaction: abort
+
+
+Preventing Deadlock
+
+Example: Case with 3 resources: A, B, C
+
+Two threads accessing the resources:
+Step		Thread 1		Thread 2
+1			Grab A
+2							Grab B
+3			Grab C
+4							Wait C
+5			Wait B
+
+You could detect that when Thread 1 grabs C it cause a
+deadlock, so we could decide not to let it grab C, but by
+then it is already too late.
+
+Key idea: Need to get rid of one of the four conditions.
+
+Possible approaches:
+
+1) Bound resource: Provide sufficient (infinite) resources
+(for all threads' demands).
+
+2) No sharing - totally independ threads
+   (not really a solution, since we want sharing)
+   
+3) No preemption: Preempt resources
+   (allow the runtime to reclaim resources)
+   Ex. can preempt main memory by copying to disk
+
+4) Wait while holding: Abort request (if can't get all
+resources that we need)
+
+5) Wait while holding: Atomically acquire all resources
+(AA/RA). Example: if you need two chopsticks, grab both at
+the same (or don't grab any)
+
+6) Wait while holding: Release lock when calling out of
+module.
+
+func foo() {
+  mutex.Lock()
+  doStuff()
+  otherModule.bar()
+  doOtherStuff()
+  mutex.Unlock()
+}
+
+func doStuff() {
+  x = x + 1
+}
+
+func doOtherStuff() {
+  y = y + 1
+}
+
+----- Avoid keeping lock when calling out of module:
+
+func foo() {
+  doStuff()
+  otherModule.bar()
+  doOtherStuff()
+}
+
+func doStuff() {
+  mutex.Lock()
+  x = x + 1
+  mutex.Unlock()
+}
+
+func doOtherStuff() {
+  mutex.Lock()
+  y = y + 1
+  mutex.Unlock()
+}
+
+7) Circular waiting: Lock Ordering
+   - establish an ordering among locks
+   - make everyone use same lock ordering
+   - forbid acquiring a lock if any higher-ordered 
+     lock is already held.
+
+Example: all threads must grab locks in the same order:
+Thread 1		Thread 2
+ x.Lock()		x.Lock()
+ y.Lock()		y.Lock()
+
+
+Banker's Algorithm: Read on your own!
+
+
+Ch. 6.3 Alternative approaches to synchronization
+
+Sometimes we resort to fine-grained locking to increase
+efficiency. When performance is really critical: avoid
+locks using:
+- read-copy-update (RCU) synchronization
+- lock-free and wait-free data structures
+
+Before starting down this line:
+- measure the performance of the system
+- make sure that these techniques yield significant gains
+- conduct code review extra throughly
+
+REMINDER: If you find yourself tempted to strip away locks:
+- Acquire() and Release() are highly tuned functions
+	- Acquiring uncontended lock is almost free
+	- If there is contention you most certainly need a lock
+
+But if you need performance: RCU etc can provide signficant 
+performance gains (and is used in Linux kernel and JVM etc)
+
+Read-Copy-Update (RCU)
+
+An optimized data structure for:
+- frequent reads (even with many concurrent readers)
+- occasional updates/writes (can be delayed for a long time)
+
+For programs that exhibit this access pattern, the standard
+RWLock can impose significant overhead. (see textbook for
+details.)
+
+The RCU approach:
+Q: How can we let concurrent reads access a data structure
+that can also be written without causing cache misses due
+to updating the SO on each read?
+
+RCU relax semantics in two:
+1. Relax R/W semantics: Allow
+	a) One read/write critical section
+	b) Many read-only critical sections
+	c) Must maintain multiple versions of its state
+		* Old version is kept until all readers have
+		  finished reading it.
+2. Restrict update rules:
+	a) RCU update is published to the data structure
+	b) Uses a single, atomic memory write 
+	   (updating a pointer)
+
+API for RCU synchronization:
+Reader API:
+	ReadLock()		- readers use these before and after
+					  reading the data structure
+	ReadUnlock()
+Writer API:
+	WriteLock()		- exclude other writers
+	Publish()		- atomically update data structure so
+					  reads can see update
+	WriteUnlock()	- release lock to allow other writers
+	Synchronize()	- wait for the grace period to expire
+					  (to free() old version)
+
+- If a read completes before a write is published: 
+  it will see the old version
+- If a read begins after a write has been published: 
+  it will see the new version
+- If a read begins before and ends after write has been 
+  published: it may see the old or the new version
+
+System guarantees that an old version is not deleted until
+the grace period ends: to allow the reads to complete 
+reading the old version.
+
+RCULinkedList::insert(Element *item) {
+	rcuLock.WriteLock();
+	// Update linked linked: insert new element
+	rcuLock.Publish(&head, item);
+	rcuLock.WriteUnlock();
+	rcuLock.Synchronize();
+}
+
+Ex. collection API in Java: 
+	java.util.concurrent.CopyOnWriteArrayList
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
