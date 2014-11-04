@@ -1,3 +1,12 @@
+##No lectures next week after all
+
+Today we wrapped up the theory lectures. Next week, you are free to work on the lab.
+If you need help with lab7, feel free to stop by my office E424 in the 8:15-10:00
+time frame on Monday and Tuesday.
+Morten and Heine will be in the lab in the regular lab hours.
+
+(Posted by Hein: Tuesday 4 Nov)
+
 ##Lecture also in Week 46
 
 Due to my travels and illness earlier this semester, I will be lecturing also in Week 46.
