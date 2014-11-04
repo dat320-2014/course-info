@@ -1,0 +1,199 @@
+Ch. 9 Caching and Virtual Memory
+
+Definitions
+
+Cache
+- Copy of data that is faster to access than the original
+- Hit: if cache has a copy
+- Miss: if cache does not have a copy
+
+Cache block
+- Unit of cache storage (multiple memory locations)
+
+Temporal Locality
+- Program tend to reference the same instructions and data
+  that they have recently accessed
+- Example: instructions in a loop or 
+           a frequently accessed data structure
+
+Spatial Locality
+- Program tend to reference nearby locations that has been
+  referenced recently
+- Example: data in a loop
+
+Write through: 
+changes are sent immediately to the next level cache.
+
+Write back:
+changes are stored in cache until cache block is replaced.
+
+Ch. 9.2 Memory hierarchy: read on your own.
+
+Ch. 9.3 When caches work and when they don't
+
+How do we know whether a cache will be effective for a
+given workload?
+
+Working Set Model
+- Set of memory locations that need to be cached
+  for reasonable cache hit rate
+
+Thrashing:
+- When system has too small a cache to hold the working set
+- Every time there is a cache miss: need to evict a cache block
+- But the new cache block may also be evicted before it is reused
+
+Phase Change Behavior
+- Programs change their working set (their behvior)
+- Bursty miss rates
+	- Periods with low cache misses interspersed with
+	  periods of high cache misses
+	- Example: Process context switch
+
+Zipf Model
+- Caching behavior for systems where some items are
+  much much more popular than others
+- Popularity = 1/k^c for the k-th most popular item, 1<c<2
+- Examples: web pages, movies, books, social connections
+
+Ch. 9.4 Memory cache lookup
+
+- Fully associative cache lookup
+	- An address can be stored anywhere in the table,
+	  so lookup must be check against all entries
+	- This can be done in parallel with CAM, but
+	  this requires many comparators, so not practical
+	  for large caches
+
+- Direct Mapped
+	- Each address can be stored in only one location in table
+	- Lookup is easy: check location of hash(adr)
+	- Problem: Cannot store more than one address that hashes
+	  to the same entry.
+	- May cause problems if same program is accessing two
+	  addresses that hashes to the same entry in the table.
+
+
+Ch. 9.5 Replacement Policies
+
+Having looked up an address in the cache and gotten a cache miss:
+we have a problem.
+
+Which memory location do we choose to replace?
+
+Answer depends heavily on the workload. Some replacement
+policies are optimal for some workloads and pessimal for
+others, in terms of cache hit rate.
+
+Policy goal: reduce cache misses
+- improve the expected case performance (common case)
+- reduce the likelihood of very poor performance
+
+- HW cache cannot use sophicated data structures and
+  replacement algorithms - decision must be taken quickly.
+- SW cache (OS) can often keep separate data structures and
+  perform more computation to determine which data item to
+  evict from the cache.
+
+Random Policy:
+- Replace a random entry
+- Fast, does not require data structures: Useful for HW caches
+- Random is never pessimal: on average it will not make the
+  worst choices.
+
+FIFO Policy
+- Replace the entry that has been in the cache the longest time
+- What could go wrong?
+	- FIFO can be the worst possible replacement policy for
+	  common workloads
+	- Cycle through an array repeatedly 
+	  (array too large to fit in the cache)
+	- FIFO may do exactly the wrong thing: evict the next
+	  needed page.
+	  
+MIN Policy
+- Replace the cache entry that will not be used for the
+  longest time into the future
+- MIN is a optimal replacement policy
+	- But as for the SJF scheduling, it relies on predicting
+	  the future; it can't be implemented
+	- It is only useful for theoretical comparisons
+
+Least Recently Used (LRU)
+- Replace the cache entry that has not been used for the
+  longest time in the past
+- Approximation of MIN
+- LRU may also be pessimal, e.g. if repeated scans through
+  memory.
+
+- For this reference pattern (on whiteboard) with cache size
+  of 4, the LRU policy is pessimal and the same as FIFO.
+- The optimal strategy: replace the most recently used page,
+  as that will be referenced farthest into the future.
+
+
+- For this reference pattern (on whiteboard),
+  The LRU and MIN policies both have 9 cache hits
+  - While FIFO have 7 cache hits.
+
+Least Frequently Used (LFU)
+- Replace the cache entry used the least often 
+  (in the recent past)
+- Better strategy for reference patterns that follow a Zipf
+  distribution (long-tail distribution)
+  
+Belady's anomaly
+=> Intution: 
+   We can improve performance by increasing the cache size.
+- Belady showed: Sometimes adding space to 
+  a cache can hurt performance
+- LRU and LFU does not suffer from Belady's anomaly, 
+  but FIFO does.
+
+
+Ch. 9.6 and 9.7: Read on your own.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

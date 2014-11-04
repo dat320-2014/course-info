@@ -33,7 +33,8 @@ Cons:
 
 Segmented Memory
 
-Segmentation: An array (in HW) of pairs of base+bounds registers, for each process
+Segmentation: An array (in HW) of pairs of base+bounds 
+registers, for each process
 
 - A segment is a contiguous region of memory
 	- Virtual or (for now) physical memory
@@ -41,13 +42,203 @@ Segmentation: An array (in HW) of pairs of base+bounds registers, for each proce
 	- Entry in table = segment
 	- HW table must be loaded from main memory (PCB) upon
 	  context switch
-- Segment can be located anywhere in physical memory (and can be of variable size)
+- Segment can be located anywhere in physical memory 
+  (and can be of variable size)
 	- Base
 	- Bound (length)
 	- Access permission (read-only, read/write)
 - Processes can share segments
 	- Same base, bounds, same/different access permissions
 
+What must be saved/restored on context switch?
+- Segement table is stored in CPU because it's small
+- Contents must be saved/restored from main memory (PCB) on 
+  context switch
+
+-> Simple design and easy for OS to manage
+- Very powerful and widely used (x86 architecture)
+- With segments: OS can allow processes to 
+	- share memory regions
+	- protect (other) memory regions
+
+We see that two process can
+- share a code segment (in physical memory) and
+- the processes may have identical virtual memory layout
+  (the code references the same data memory locations)
+  but their
+- data segements are located at different physical locations
+
+This can also be applied to a shared library (shared code 
+segement for all processes) with separate data segement for 
+each process using the shared library.
+
+Unix fork syscall: Copy-on-write
+- fork(): Makes a complete copy of a process
+- child process becomes a copy of the parent
+- By using segmentation:
+- Only need to copy segement table into the child
+- Mark parent and child segment table as read only
+- Start child process; return to parent
+- If the child or parent writes to segment, it will trap 
+  into the kernel:
+	- Trap will make a copy of the segment and resume
+	
+Zero-on-reference
+How much physical memory do we need to allocate for the 
+stack or heap?
+- Zero byte!
+
+When program touches the heap:
+- Segmentation fault into OS kernel
+- Kernel allocates some memory
+- Zeros out the memory
+	- avoid accidental leaking of information
+- Resume process
+
+Pros/Cons of Segmentation
+
+Pros:
+- Can share code/data segments between processes
+- Can protect code segment from being overwritten
+- Can transparently grows stack/heap as needed
+- Can detect if need to copy-on-write
+
+Cons:
+- Complex memory management
+	- Need to find chunk of a particular size
+- May need to rearrange memory from time to time to make  
+  room for a new segment or growing a segment
+	- External fragmentation: wasted space between chunks
+	- Could use compactation, but is too costly.
+
+Paged Memory
+
+- Manage memory in fixed sized units (or pages)
+- Finding a free page is easy:
+	- Bitmap allocation: 0001010010111101011
+	- Each bit represents one physical page frame
+		- 1=allocated, 0=free
+	- Simpler than base+bounds or segmentation
+- Each process has its own page table
+	- Stored in physical memory
+	- Hardware registers
+		- pointer to page table start
+		- page table length
+
+Paging Questions:
+- What must be saved/restored on a process context switch?
+	- Pointer to page table/size of page table
+	- Page table itself is already in main memory
+- What if the page size is very small
+	- Small pages gives many pages, and page table becomes 
+	  very large
+- or very large?
+	- Internal fragmentation: if we don't use all of the 
+	  space inside a fixed size chunk.
+
+Paging with Copy-on-write:
+- Can we share memory between processes?
+	- Set entries in both page tables to point to the same 
+	  page frames
+	- Core map of page frames: track processes point to 
+	  which page frames
+- Unix fork with copy on write at page table granularity
+	- Copy page table entries from old to new process
+	- Mark all pages read only
+	- Trap into kernel on write (in child or parent process)
+	- Copy page and resume execution
+
+Sparse Address Spaces
+- Might want many separate segments
+	- Per-processor heap
+	- Per-thread stacks
+	- Memory-mapped files
+	- Dynamically linked libraries
+- What if virtual address space is sparse?
+	- Consider a 32-bit system with page size of 4KB (2^12)
+	- Then a page table consists of 1 million entries
+		(2^32/2^12)=2^20 (1 million)
+	- If each entry is 4 bytes
+		- Page table for each process takes up 4B*2^20=4MB
+	- 64-bits => 4 quadrillion page table entries
+
+Question: What can we do to reduce the memory overhead of 
+ page tables?
+
+Multi-level Translation (Hierarchical table structure)
+- Tree of translation tables
+	- Paged segmentation
+	- Multi-table page tables
+	- Multi-level paged segmentation
+All three: Fixed sized pages as the lowest level unit
+
+x86 Multi-level Paged Segmentation
+- Multilevel page table
+	- 4KB pages, each level of page table fits in one page
+	- Only fill page table if needed
+	- 32-bit: two level page table (per segment)
+	- 64-bit: four level page table (per segment)
+
+Multi-level Translation:
+Pros:
+	- Simple memory allocation
+	- Allocate/fill only as many page tables as used
+	- Share at segment or page level
+
+Cons:
+	- Space overhead: at least one pointer per virtual page
+	- Two or more lookups per memory reference
+
+Ch. 8.3. Efficient Address Translation
+
+- Translation Lookaside Buffer (TLB)
+	- On-chip cache of recent translations: 
+		virtual page -> physical page
+	- Likely that: fetching one instruction or data item 
+	  will lead to fetching more on the same page.
+	- Content-Addressable Memory (CAM): special memory
+	  for high-speed searching applications
+	- If cache hit, use translation
+	- If cache miss, walk multi-level page table
+
+Cost(Translation) = Cost(TLB lookup) 
+                  + Prob(TLB miss) * Cost(Page Table lookup)
+
+Video frame buffer for HDTV 1080p with 32 bits/pixel
+1920x1080 = 63.28MB
+
+Efficiently map the frame buffer for the computer display
+- Redraw screen: processor must touch every pixel
+- With 4KB page size, and 256 entries in TLB
+	- Can map only 1MB of the frame buffer
+	- Cause significant reloading of TLB entries:
+		256*63=16128
+
+To solve this problem we can introduce:
+
+Super pages
+
+- TLB entry can be
+	- a page
+	- a super page: a set of contiguous pages
+- On x86 a super page is set of page in one page table
+	- x86 TLB entries
+		- 4KB (default)
+		- 2MB (can skip one level in page table)
+		- 1GB (can skip two levels in page table)
+
+Hardware Design Principle
+- The bigger the memory the slower the memory
+
+Memory Hierarchy:
+
+Cache							Hit Cost		Size
+1st level cache/1st level TLB		 1ns		 64KB
+2nd level cache/2nd level TLB		 4ns		256KB
+3rd level cache						12ns		  2MB
+Memory (DRAM)					   100ns		 10GB
+Data center memory (DRAM)		   100micros	100TB
+...
 
 
 
