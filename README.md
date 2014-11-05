@@ -1,3 +1,28 @@
+##Remote access to work with the zaplab
+
+As mentioned in my walkthrough of the zaplab on Tuesday, there is a firewall that
+prevents direct `ssh` connections to the machines in the pitter-lab. However, 
+you can use any of the following machines to gain access to the multicast stream:
+
+`{badne5,badne6,badne7,badne8}.ux.uis.no`
+
+However, you need to ensure that your `zapserver` source code is uploaded to
+your Unix account before you compile it on one of the badne machines.
+Alternatively, you may also compile the code locally on your own machine,
+assuming you are working on Linux, and then copy the binary to your Unix account.
+
+A few tips to ease this process of copying files from a local development machine
+to your Unix account is to install [sshfs](http://fuse.sourceforge.net/sshfs.html) (Linux)
+or [osxfuse](http://osxfuse.github.io) (Mac OS X). These tools allow you to mount
+your Unix account folder as a remote drive on your local machine, meaning that you
+can work almost as if your files were local (except for the added latency.)
+
+From a Windows environment, I don't know which is the best tool, but
+[WinSCP](http://winscp.net/eng/index.php)
+seems to be one possibility that requires manually copying of files.
+
+(Posted by Hein: Wednesday 5 Nov)
+
 ##No lectures next week after all
 
 Today we wrapped up the theory lectures. Next week, you are free to work on the lab.
