@@ -1,3 +1,31 @@
+##More remote access for *advanced users/developers*
+
+*The following assumes that you have a publicly accessible IP address at your
+home, i.e. you are not yourself behind a firewall or NAT router, unless you have
+access rights and can configure port forwarding.*
+
+*This tip is not a requirement for the lab; it is only meant to direct those of
+you who are more adventurous.*
+
+As I pointed out in my post yesterday, you cannot Dial into the badne machines
+because of the firewall. You can only dial into port 22, but then you will only
+hit the `ssh` server for interactive login sessions or command execution.
+
+However, if you wish to work on your local system at home, you could set up a
+machine with a public IP, and start your zapserver there, listening on the public
+IP and some port that you decide (instead of the multicast address). The you
+need to develop a forwarding service that needs listen to the multicast stream
+and forward that to your home server. Then you can do all your coding on your
+home server. That is, you first need to implement the forwarding service and run
+that on one of the badne or pitter machines. By having the forwarding service make
+connections from inside UiS to your home server, you can circumvent the firewall.
+This should be fairly easy to do if you have solid skills, but I’ve not tried it.
+
+This library *may* be helpful:
+https://github.com/petar/GoTeleport
+
+(Posted by Hein: Thursday 6 Nov)
+
 ##Remote access to work with the zaplab
 
 As mentioned in my walkthrough of the zaplab on Tuesday, there is a firewall that
