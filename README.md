@@ -1,3 +1,10 @@
+##Typo in the zaplab description
+
+In Part 1 c) `simplestorage.go` should be replaced with `simplelogger.go`. 
+This file resides in the `zlog` folder on github. 
+
+(Posted by Hein: Monday 10 Nov)
+
 ##More remote access for *advanced users/developers*
 
 *The following assumes that you have a publicly accessible IP address at your
