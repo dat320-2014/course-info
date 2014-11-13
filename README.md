@@ -1,3 +1,11 @@
+##Discrepencies between the description and the zapserver code
+
+There are some discrepencies between the pre-supplied lab naming in the
+`runLab()` method of `zapserver` and the description. Please follow the
+description, and change the `zapserver` code accordingly.
+
+(Posted by Hein: Monday 13 Nov)
+
 ##Typo in the zaplab description
 
 In Part 1 c) `simplestorage.go` should be replaced with `simplelogger.go`. 
