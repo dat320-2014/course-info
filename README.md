@@ -1,3 +1,22 @@
+##Some supplementary information for Part 2
+
+Regarding the question: *How would you characterize the access pattern to the server’s state?*
+
+What is meant with this question is related to the `zapserver` and 
+how it handles different messages. You can view the `zapserver` as
+a sort of a hub, where the STBs send their messages which leads to
+state updates (updates to the channels being watched by the customers),
+and as a producer of statistics messages for the RPC clients (statistics
+over which channels are being watched.) The question is what type of
+state accesses these messages represents; is it reads or writes. 
+And how many reads are there per write, also called the read/write
+ratio. You need not be specific in terms of providing an exact number,
+but you should have some notion of the magnitude of this relation.
+
+Regarding the computation of average duration: If an IP address has
+only a single recorded zap event, then it is suggested that you
+ignore this event/IP when computing the average. 
+
 ##Discrepencies between the description and the zapserver code
 
 There are some discrepencies between the pre-supplied lab naming in the
