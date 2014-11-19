@@ -1,4 +1,4 @@
-       |  *27-Nov*                    |  *09-Dec*                     | *Arrive at*  |
+       |  27-Nov                      |  09-Dec                       | Arrive at    |
 -------|------------------------------|-------------------------------|--------------|
 08:00  |  Dreyer, Katrine Bærheim     |  Høiland, Torbjørn Nesbø      |  07:30       |                                                                        
 08:20  |  Finnesand, Tor Morten       |  Jespersen, Simon             |  07:30       |                                                                        
@@ -20,4 +20,4 @@ Lunch  |                              |                               |         
 14:20  |  Perez, Miguel mendez        |                               |  12:10       |                                                                        
 14:40  |  Pettersen, Jonatan          |                               |  12:10       |                                                                        
 
-Arrive at means: to login, set up terminals, load code into editor etc, and lock screen before leaving the room.
+**Arrive at** means: to login, set up terminals, load code into editor etc, and lock screen before leaving the room.
