@@ -1,10 +1,10 @@
        |  27-Nov                      |  09-Dec                       | Arrive at    |
 -------|------------------------------|-------------------------------|--------------|
-08:00  |                              |  Høiland, Torbjørn Nesbø      |  07:30       |                                                                        
+08:00  |  Collette, Gabrielle         |  Høiland, Torbjørn Nesbø      |  07:30       |                                                                        
 08:20  |                              |  Jespersen, Simon             |  07:30       |                                                                        
 08:40  |  Johnstad, Andreas Schikora  |  Kverneland, Georg            |  07:30       |                                                                        
 09:00  |  Getaz, Sven                 |  Nuridov, Adam                |  07:30       |                                                                        
-09:20  |  Collette, Gabrielle         |  Prikrylova, Katrin           |  07:30       |                                                                        
+09:20  |                              |  Prikrylova, Katrin           |  07:30       |                                                                        
 09:40  |  Hapnes, Odd Anders Hatløy   |  Rudlang, Leif Andreas Thune  |  07:30       |                                                                        
 Break  |                              |                               |              |                                                                        
 10:30  |                              |  Pettersen, Jonatan           |  10:00       |                                                                        
