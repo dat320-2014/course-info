@@ -17,8 +17,8 @@ Lunch  |                              |                               |         
 13:20  |  Finnesand, Tor Morten       |  Bjørkelund, Ronnie           |  12:10       |                                                                        
 13:40  |  Wathne, Ronny               |  Pedersen, Sebastian Mæland   |  12:10       |                                                                        
 14:00  |  Egseth, Stian Francis Allen |  Opheim, Steffen              |  12:10       |                                                                        
-14:20  |  Hellum, Kjell Arne          |  Husebø, Jonas Jørgensen      |  12:10       |                                                                        
-14:40  |  Hagen, Joakim               |  Dreyer, Katrine Bærheim      |  12:10       |                                                                        
-15:00  |                              |                               |  12:10       |                                          
+14:20  |  Hagen, Joakim               |  Husebø, Jonas Jørgensen      |  12:10       |                                                                        
+14:40  |                              |  Dreyer, Katrine Bærheim      |  12:10       |                                                                        
+15:00  |                              |  Hellum, Kjell Arne           |  12:10       |                                          
 
 **Arrive at** means: to login, set up terminals, load code into editor etc, and lock screen before leaving the room.
