@@ -1,20 +1,3 @@
-##Exam preparation
-
-I've set aside some time Wednesday Dec 9 at 0900-1000 for a brief summary
-of what you can expect on the exam on Saturday. I won't have time to
-walk through a previously given exam, but I may be able to address
-specific questions from a previous exam, if sent to me up front.
-
-A few points others have asked already: There won't be any Java on
-the upcoming exam. You will be asked to produce Go code on the exam;
-the code is not expected to pass a strict compiler or to use exactly
-the right API function call names, but the code should make sense
-from the principles of the OS theory presented in the course.
-
-The room will be E458 unless you hear otherwise.
-
-(Posted by Hein: Monday 8 Dec)
-
 ##Some supplementary information for Part 2
 
 Regarding the question: *How would you characterize the access pattern to the server’s state?*
